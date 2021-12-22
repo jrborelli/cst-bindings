@@ -11,7 +11,7 @@
 
 package br.unicamp.cst.bindings.soar;
 
-import br.unicamp.cst.representation.wme.Idea;
+import br.unicamp.cst.representation.idea.Idea;
 import com.google.common.primitives.Doubles;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

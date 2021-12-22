@@ -1,6 +1,6 @@
 package br.unicamp.cst.bindings.soar;
 
-import br.unicamp.cst.representation.wme.Idea;
+import br.unicamp.cst.representation.idea.Idea;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
