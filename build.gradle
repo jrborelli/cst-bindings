@@ -10,7 +10,7 @@ description = "CST is the Cognitive Systems Toolkit, a toolkit for the construct
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-version = '1.0.2'
+version = '1.0.3'
 
 repositories {
     flatDir {
@@ -34,7 +34,7 @@ configurations {
 }
 
 dependencies {
-    api('com.github.CST-Group:cst:cbd096f')
+    api('com.github.CST-Group:cst:30fe97d')
 
     api 'com.soartech:jsoar-core:4.1.0'
     api 'com.soartech:jsoar-debugger:4.1.0'
