@@ -42,6 +42,7 @@ dependencies {
     //implementation 'com.github.rosjava:rosjava_core:0.3.7'
     api 'com.github.rosjava:rosjava_core:0.3.7'
     api 'org.ros.rosjava_bootstrap:message_generation:0.3.3'
+    api 'ch.qos.logback:logback-classic:1.0.11' // Used in JSoarCodelet
 
     testImplementation 'com.1stleg:jnativehook:2.1.0'
     testImplementation group: 'junit', name: 'junit', version: '4.12'

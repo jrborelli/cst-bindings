@@ -12,7 +12,7 @@
 package br.unicamp.cst.bindings.soar;
 
 import br.unicamp.cst.core.entities.Codelet;
-import br.unicamp.cst.representation.wme.Idea;
+import br.unicamp.cst.representation.idea.Idea;
 import com.google.common.primitives.Doubles;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

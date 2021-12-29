@@ -1,4 +1,4 @@
-![](https://github.com/CST-Group/cst/actions/workflows/java-ci.yml/badge.svg)
+![](https://github.com/CST-Group/cst-bindings/actions/workflows/java-ci.yml/badge.svg)
 [![Maintainability](https://api.codeclimate.com/v1/badges/82a61f13a021683fabd3/maintainability)](https://codeclimate.com/github/CST-Group/cst-bindings/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/82a61f13a021683fabd3/test_coverage)](https://codeclimate.com/github/CST-Group/cst-bindings/test_coverage)
 [![](https://jitpack.io/v/CST-Group/cst-bindings.svg)](https://jitpack.io/#CST-Group/cst-bindings)
