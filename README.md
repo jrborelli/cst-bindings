@@ -32,7 +32,7 @@ Note: This library is still under development, and some concepts or features mig
 	}
 ```
 
-Sometimes, the version number (tag) in this README gets out of date, as maintainers might forget to change it when releasing. Always check the release badge [![](https://jitpack.io/v/CST-Group/cst.svg?label=Release)](https://jitpack.io/#CST-Group/cst) to see the actual current version number that should be provided in the dependencies in Step 2 above.
+Sometimes, the version number (tag) in this README gets out of date, as maintainers might forget to change it when releasing. Always check the release badge [![](https://jitpack.io/v/CST-Group/cst-bindings.svg)](https://jitpack.io/#CST-Group/cst-bindings) to see the actual current version number that should be provided in the dependencies in Step 2 above.
 
 ### Maven
 
@@ -57,7 +57,7 @@ Sometimes, the version number (tag) in this README gets out of date, as maintain
 	</dependency>
 ```
 
-Sometimes, the version number (tag) in this README gets out of date, as maintainers might forget to change it when releasing. Always check the release badge [![](https://jitpack.io/v/CST-Group/cst.svg?label=Release)](https://jitpack.io/#CST-Group/cst) to see the actual current version number that should be provided in the dependencies in Step 2 above.
+Sometimes, the version number (tag) in this README gets out of date, as maintainers might forget to change it when releasing. Always check the release badge [![](https://jitpack.io/v/CST-Group/cst-bindings.svg)](https://jitpack.io/#CST-Group/cst-bindings) to see the actual current version number that should be provided in the dependencies in Step 2 above.
 
 ### Manual
 
