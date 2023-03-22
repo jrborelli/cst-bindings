@@ -58,6 +58,7 @@ task javadocJar(type: Jar) {
     from {
         configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
     }
+    javadoc.options.addStringOption('Xdoclint:none', '-quiet')
 }
 task sourcesJar(type: Jar) {
     classifier = 'sources'
