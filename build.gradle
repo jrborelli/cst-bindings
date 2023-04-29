@@ -10,7 +10,7 @@ description = "CST-Bindings"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-version = '1.0.5'
+version = '1.0.6'
 
 repositories {
     flatDir {
@@ -34,7 +34,7 @@ configurations {
 }
 
 dependencies {
-    api('com.github.CST-Group:cst:8c66269')
+    api('com.github.CST-Group:cst:b786d73')
 
     api 'com.soartech:jsoar-core:4.1.0'
     api 'com.soartech:jsoar-debugger:4.1.0'
