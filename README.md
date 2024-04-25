@@ -28,7 +28,7 @@ Note: This library is still under development, and some concepts or features mig
 ```
 	dependencies {
             ...
-            implementation 'com.github.CST-Group:cst-bindings:1.0.6'
+            implementation 'com.github.CST-Group:cst-bindings:1.0.7'
 	}
 ```
 
@@ -53,7 +53,7 @@ Sometimes, the version number (tag) in this README gets out of date, as maintain
 	<dependency>
 	    <groupId>com.github.CST-Group</groupId>
 	    <artifactId>cst-bindings</artifactId>
-	    <version>1.0.6</version>
+	    <version>1.0.7</version>
 	</dependency>
 ```
 
