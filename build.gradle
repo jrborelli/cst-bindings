@@ -15,7 +15,7 @@ java {
    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-version = '1.0.7'
+version = '1.0.8'
 
 repositories {
     flatDir {
@@ -39,7 +39,7 @@ configurations {
 }
 
 dependencies {
-    api('com.github.CST-Group:cst:1.4.1')
+    api('com.github.CST-Group:cst:1.4.2')
 
     api 'com.soartech:jsoar-core:4.1.3'
     api 'com.soartech:jsoar-debugger:4.1.3'

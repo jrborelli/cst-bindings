@@ -668,5 +668,31 @@ public class JSoarCodeletTest {
         mind.shutDown();
         assertEquals(expectedJson, testJson);
     }
+    
+    @Test
+    public void contractViolationTest(){
+        Mind mind = new Mind();
+
+        String soarRulesPath="src/test/resources/mac.soar";
+        jSoarCodelet.initSoarPlugin("testAgent", new File(soarRulesPath), false);
+        mind.insertCodelet(jSoarCodelet);
+
+        mind.start();
+
+        try{
+            Thread.sleep(5000L);
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+
+        String inputLink = jSoarCodelet.getInputLinkAsString();
+        String outputLink = jSoarCodelet.getOutputLinkAsString();
+
+        System.out.println(inputLink);
+        System.out.println(outputLink);
+
+       mind.shutDown();
+
+}
 
 }
