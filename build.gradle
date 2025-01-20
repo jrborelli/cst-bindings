@@ -36,7 +36,7 @@ configurations {
 }
 
 dependencies {
-    api('com.github.CST-Group:cst:2032096')
+    api('com.github.CST-Group:cst:e93dc57')
 
     api 'com.soartech:jsoar-core:4.1.3'
     api 'com.soartech:jsoar-debugger:4.1.3'
