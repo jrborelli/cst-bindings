@@ -15,7 +15,7 @@ java {
    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-version = '1.0.8'
+version = '1.1.0'
 
 repositories {
     flatDir {
@@ -26,10 +26,7 @@ repositories {
         url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
     }
     maven {
-        url "https://repository.springsource.com/maven/bundles/release"
-    }
-    maven {
-        url "https://repository.springsource.com/maven/bundles/external"
+        url "https://artifacts.camunda.com/artifactory/public/"
     }
     maven { url 'https://jitpack.io' }
 }
@@ -39,7 +36,7 @@ configurations {
 }
 
 dependencies {
-    api('com.github.CST-Group:cst:1.4.2')
+    api('com.github.CST-Group:cst:1.5.0')
 
     api 'com.soartech:jsoar-core:4.1.3'
     api 'com.soartech:jsoar-debugger:4.1.3'
