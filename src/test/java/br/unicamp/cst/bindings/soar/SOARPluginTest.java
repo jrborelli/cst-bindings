@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.*;
 
@@ -372,6 +373,22 @@ public class SOARPluginTest {
 
 
         assertTrue((Boolean) idea.getL().get(0).getL().get(0).getL().get(0).getL().get(0).getL().get(0).getValue());
+    }
+    
+    @Test
+    public void processInputLinkIdeaTest(){
+        String soarRulesPath="src/test/resources/smartCar.soar";
+        SOARPlugin soarPlugin = new SOARPlugin("testName", new File(soarRulesPath), false);
+        Idea inputLinkIdea = new Idea("INPUT_LINK_IDEA");
+        Idea scoreIdea = new Idea("SCORE", 0);
+        Idea creatureIdea = new Idea("CREATURE", "");
+        Idea sensorIdea = new Idea("SENSOR");
+        inputLinkIdea.add(scoreIdea);
+        inputLinkIdea.add(creatureIdea);
+        inputLinkIdea.add(sensorIdea);
+        soarPlugin.setInputLinkIdea(inputLinkIdea);
+        soarPlugin.processInputLink();
+        assertEquals("(I2,SENSOR,W2)\n(I2,SCORE,0.0)\n(I2,CREATURE,W1)\n", soarPlugin.getWMEStringInput());
     }
 
 

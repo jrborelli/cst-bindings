@@ -698,7 +698,7 @@ public class SOARPlugin {
         if (il != null) {
             List<Idea> parts = il.getL();
             for (Idea w : parts) {
-                if (w.getValue().equals("") ){
+                if (w.getValue() == null || w.getValue().equals("")){
                     Identifier id2 = createIdWME(id, w.getName());
                     processInputLink(w, id2);
                 }
