@@ -662,7 +662,7 @@ public class SOARPlugin {
             Symbol v = wme.getValue();
             Identifier testv = v.asIdentifier();
             if (testv != null) { // The value is an identifier
-                Idea child = getWorldObject(testv, a.toString());
+                Idea child = getWorldObject(testv, name + "." + a.toString());
                 newwo.add(child);
             } else { // The value is a property
                 Idea qd;
@@ -682,7 +682,7 @@ public class SOARPlugin {
         Identifier ol = getAgent().getInputOutput().getOutputLink();
         if (ol == null) logger.severe("Error in cst.SOARPlugin: Unable to get access to OutputLink");
 
-        Idea olao = getWorldObject(ol, "OutputLink");
+        Idea olao = getWorldObject(ol, agentName + ".OutputLink");
         setOutputLinkIdea(olao);
     }
 
