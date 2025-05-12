@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.*;
@@ -743,6 +744,62 @@ public class SOARPluginTest {
         assertEquals(expectedOutput, actualOutput);
         assertTrue(javaObject instanceof SoarCommandChange);
         assertTrue(javaObject_2 instanceof SoarCommandChange);
+        soarPlugin.stopSOAR();
+    }
+    
+    @Test
+    public void testGetWorldObjectWithWmesWithSameName(){
+
+        String soarRulesPath="src/test/resources/smartCar.soar";
+        SOARPlugin soarPlugin = new SOARPlugin("testName", new File(soarRulesPath), false);
+
+        String agentName = "Creature_1";
+        Idea outputLinkIdea = new Idea(agentName+".OutputLink");
+        
+        Idea entity1Idea = new Idea(agentName+".OutputLink"+".ENTITY");
+        Idea entity1NameIdea = new Idea(agentName+".OutputLink"+".ENTITY"+".NAME", "JÃO");
+        Idea entity1ColorIdea = new Idea(agentName+".OutputLink"+".ENTITY"+".COLOR", "BLUE");
+        entity1Idea.add(entity1NameIdea);
+        entity1Idea.add(entity1ColorIdea);
+        
+        Idea entity2Idea = new Idea(agentName+".OutputLink"+".ENTITY");
+        Idea entity2NameIdea = new Idea(agentName+".OutputLink"+".ENTITY"+".NAME", "MARIA");
+        Idea entity2ColorIdea = new Idea(agentName+".OutputLink"+".ENTITY"+".SIZE", "BIG");
+        entity2Idea.add(entity2NameIdea);
+        entity2Idea.add(entity2ColorIdea);
+        
+        outputLinkIdea.add(entity1Idea);
+        outputLinkIdea.add(entity2Idea);
+        soarPlugin.setInputLinkIdea(outputLinkIdea);
+        
+        soarPlugin.runSOAR();
+
+        try{
+            Thread.sleep(2000L);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        
+        Idea inputLinkIdea = soarPlugin.getWorldObject(soarPlugin.getAgent().getInputOutput().getInputLink(), agentName + ".OutputLink");
+        assertEquals(2, inputLinkIdea.getL().size());
+        Boolean hasColorIdea = false;
+        Boolean hasSizeIdea = false;
+        for(Idea entityIdea : inputLinkIdea.getL()){
+            assertTrue(entityIdea.get("COLOR") != null || entityIdea.get("SIZE") != null);
+            Idea colorIdea = entityIdea.get("COLOR");
+            Idea sizeIdea = entityIdea.get("SIZE");
+            if(colorIdea != null) {
+                hasColorIdea = true;
+                assertEquals("BLUE", colorIdea.getValue());
+            }
+            if(sizeIdea != null) {
+                hasSizeIdea = true;
+                assertEquals("BIG", sizeIdea.getValue());
+            }
+        }
+        assertTrue(hasColorIdea);
+        assertTrue(hasSizeIdea);
         soarPlugin.stopSOAR();
     }
     

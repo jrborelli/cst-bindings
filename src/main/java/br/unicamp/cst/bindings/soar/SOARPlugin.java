@@ -408,6 +408,7 @@ public class SOARPlugin {
         return json;
     }
 
+     //TODO: esse método também usar o createIdea e reescreve Ideas com o mesmo nome, provavelmente vai ter que refatorar também o jeito que escreve a String também
     public Object createIdeaFromJson(JsonObject jsonInput){
         Set<Map.Entry<String, JsonElement>> entryset = jsonInput.entrySet();
         Entry<String, JsonElement> entry;
@@ -652,9 +653,17 @@ public class SOARPlugin {
             newwo = Idea.createIdea(name,"",0);
         }
         while (It.hasNext()) {
-
+            boolean shouldReuseIdea;
             if (newwo == null) {
-                newwo = Idea.createIdea(name,"",phase);
+                String currentIdName = id.getNameLetter() + Long.toString(id.getNameNumber());
+                Idea existingIdea = Idea.repo.get(name +"."+phase);
+                if (existingIdea == null){
+                    shouldReuseIdea = false;
+                } else {
+                    String existingIdName = (String) existingIdea.getValue();
+                    shouldReuseIdea = existingIdName.equals(currentIdName);
+                }
+                newwo = shouldReuseIdea ? Idea.createIdea(name, currentIdName, phase) : new Idea(name, currentIdName, phase);
             }
 
             Wme wme = It.next();
@@ -671,8 +680,7 @@ public class SOARPlugin {
                 else if (v.asInteger() != null) value = v.asInteger().getValue();
                 else value = v.toString();
                 qd = new Idea(a.toString(), value);
-                Idea pp = new Idea(a.toString(), qd);
-                newwo.add(pp);
+                newwo.add(qd);
             }
         }
         return (newwo);
