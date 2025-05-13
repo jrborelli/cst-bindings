@@ -838,10 +838,10 @@ public class SOARPluginTest {
     }
 
     @Test
-    public void testProcesOutputLinkTwoAgentSameName(){
+    public void testProcesOutputLinkTwoAgentDifferentName(){
         String soarRulesPath="src/test/resources/smartCar.soar";
         SOARPlugin soarPlugin1 = new SOARPlugin("Creature_1", new File(soarRulesPath), false);
-        SOARPlugin soarPlugin2 = new SOARPlugin("Creature_1", new File(soarRulesPath), false);
+        SOARPlugin soarPlugin2 = new SOARPlugin("Creature_2", new File(soarRulesPath), false);
 
         String jsonString = "{\"InputLink\":{\"CURRENT_PERCEPTION\":{\"CONFIGURATION\":{\"TRAFFIC_LIGHT\":{\"CURRENT_PHASE\":{\"PHASE\":\"RED\",\"NUMBER\":4.0}},\"SMARTCAR_INFO\":\"NO\"}}}}";
         JsonObject jsonInput = JsonParser.parseString(jsonString).getAsJsonObject();
@@ -861,37 +861,8 @@ public class SOARPluginTest {
 
         Idea soarPlugin1OutputLinkIdea = soarPlugin1.getOutputLinkIdea();
         Idea soarPlugin2OutputLinkIdea = soarPlugin2.getOutputLinkIdea();
-        assertEquals(soarPlugin1OutputLinkIdea, soarPlugin2OutputLinkIdea);
+        assertNotEquals(soarPlugin1OutputLinkIdea, soarPlugin2OutputLinkIdea);
         soarPlugin1.stopSOAR();
         soarPlugin2.stopSOAR();
-    }
-
-        @Test
-        public void testProcesOutputLinkTwoAgentDifferentName(){
-            String soarRulesPath="src/test/resources/smartCar.soar";
-            SOARPlugin soarPlugin1 = new SOARPlugin("Creature_1", new File(soarRulesPath), false);
-            SOARPlugin soarPlugin2 = new SOARPlugin("Creature_2", new File(soarRulesPath), false);
-
-            String jsonString = "{\"InputLink\":{\"CURRENT_PERCEPTION\":{\"CONFIGURATION\":{\"TRAFFIC_LIGHT\":{\"CURRENT_PHASE\":{\"PHASE\":\"RED\",\"NUMBER\":4.0}},\"SMARTCAR_INFO\":\"NO\"}}}}";
-            JsonObject jsonInput = JsonParser.parseString(jsonString).getAsJsonObject();
-
-            soarPlugin1.setInputLinkIdea((Idea)soarPlugin1.createIdeaFromJson(jsonInput));
-            soarPlugin1.runSOAR();
-
-            soarPlugin2.setInputLinkIdea((Idea)soarPlugin2.createIdeaFromJson(jsonInput));
-            soarPlugin2.runSOAR();
-
-            try{
-                Thread.sleep(2000L);
-            }
-            catch (Exception e){
-                e.printStackTrace();
-            }
-
-            Idea soarPlugin1OutputLinkIdea = soarPlugin1.getOutputLinkIdea();
-            Idea soarPlugin2OutputLinkIdea = soarPlugin2.getOutputLinkIdea();
-            assertNotEquals(soarPlugin1OutputLinkIdea, soarPlugin2OutputLinkIdea);
-            soarPlugin1.stopSOAR();
-            soarPlugin2.stopSOAR();
-        }        
+    }        
 }

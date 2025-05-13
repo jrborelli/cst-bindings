@@ -109,7 +109,7 @@ public abstract class JSoarCodelet extends Codelet {
                     for (Field field : type.getDeclaredFields()) {
                         if (p.getName().equals(field.getName())) {
                            if(p.getL().isEmpty()){
-                               Object value = ((Idea) p.getValue()).getValue();
+                               Object value = p.getValue();
                                if (Doubles.tryParse(value.toString()) != null) {
                                    Double fvalue = Doubles.tryParse(value.toString());
                                    field.set(commandObject, fvalue);
