@@ -15,8 +15,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.*;
 
@@ -842,7 +840,7 @@ public class SOARPluginTest {
         String soarRulesPath="src/test/resources/smartCar.soar";
         SOARPlugin soarPlugin1 = new SOARPlugin("Creature_1", new File(soarRulesPath), false);
         SOARPlugin soarPlugin2 = new SOARPlugin("Creature_2", new File(soarRulesPath), false);
-
+        
         String jsonString = "{\"InputLink\":{\"CURRENT_PERCEPTION\":{\"CONFIGURATION\":{\"TRAFFIC_LIGHT\":{\"CURRENT_PHASE\":{\"PHASE\":\"RED\",\"NUMBER\":4.0}},\"SMARTCAR_INFO\":\"NO\"}}}}";
         JsonObject jsonInput = JsonParser.parseString(jsonString).getAsJsonObject();
 
@@ -864,5 +862,55 @@ public class SOARPluginTest {
         assertNotEquals(soarPlugin1OutputLinkIdea, soarPlugin2OutputLinkIdea);
         soarPlugin1.stopSOAR();
         soarPlugin2.stopSOAR();
-    }        
+    }      
+    
+     @Test
+    public void createIdeaFromJson_ArrayOfLights_Test() {
+        String soarRulesPath="src/test/resources/smartCar.soar";
+        SOARPlugin soarPlugin = new SOARPlugin("Creature", new File(soarRulesPath), false);
+        String json = "{\n" +
+                      "  \"traffic\": {\n" +
+                      "    \"light\": [\n" +
+                      "      { \"color\": \"red\", \"number\": 4 },\n" +
+                      "      { \"color\": \"green\", \"number\": 1 }\n" +
+                      "    ]\n" +
+                      "  }\n" +
+                      "}";
+
+        JsonObject jsonInput = JsonParser.parseString(json).getAsJsonObject();
+        Object result = soarPlugin.createIdeaFromJson(jsonInput); // substitua por instância real, se necessário
+
+        // A saída principal deve ser uma única Idea chamada "traffic"
+        assertTrue(result instanceof Idea);
+        Idea traffic = (Idea) result;
+        assertEquals("traffic", traffic.getName());
+
+        // Deve haver exatamente 2 filhos chamados "light"
+        ArrayList<Idea> lights = new ArrayList<>();
+        for (Idea child : traffic.getL()) {
+            if (child.getName().equals("light")) {
+                lights.add(child);
+            }
+        }
+
+        assertEquals(2, lights.size());
+        
+
+        Idea light1 = lights.get(0);
+        Idea light2 = lights.get(1);
+        if (light1 != null &&  light1.getL().get(0).getValue() == "red") {
+            assertEquals("red", light1.getL().get(0).getValue());
+            assertEquals(4.0, light1.getL().get(1).getValue()); 
+
+            assertEquals("green", light2.getL().get(0).getValue());
+            assertEquals(1.0, light2.getL().get(1).getValue());
+        } else if (light1 != null &&  light1.getL().get(0).getValue() == "green") {
+            assertEquals("green", light1.getL().get(0).getValue());
+            assertEquals(1.0, light1.getL().get(1).getValue()); 
+
+            assertEquals("red", light2.getL().get(0).getValue());
+            assertEquals(4.0, light2.getL().get(1).getValue());
+        }
+        
+    }
 }

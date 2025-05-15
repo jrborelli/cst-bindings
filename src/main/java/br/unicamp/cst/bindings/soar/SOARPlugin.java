@@ -15,8 +15,10 @@ import br.unicamp.cst.representation.idea.Idea;
 import com.google.common.primitives.Doubles;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.jsoar.kernel.Agent;
 import org.jsoar.kernel.Phase;
 import org.jsoar.kernel.RunType;
@@ -407,8 +409,13 @@ public class SOARPlugin {
         }
         return json;
     }
+    
+    private Object extractPrimitiveValue(JsonPrimitive primitive) {
+        if (primitive.isNumber()) return primitive.getAsDouble();
+        if (primitive.isBoolean()) return primitive.getAsBoolean();
+        return primitive.getAsString();
+    }
 
-     //TODO: esse método também usar o createIdea e reescreve Ideas com o mesmo nome, provavelmente vai ter que refatorar também o jeito que escreve a String também
     public Object createIdeaFromJson(JsonObject jsonInput){
         Set<Map.Entry<String, JsonElement>> entryset = jsonInput.entrySet();
         Entry<String, JsonElement> entry;
@@ -419,24 +426,20 @@ public class SOARPlugin {
         while (itr.hasNext()) {
             entry = itr.next();
             String key = entry.getKey();
+            JsonElement element = entry.getValue();
 
-            if (entry.getValue().isJsonPrimitive()) {
+            if (element.isJsonPrimitive()) {
+                
+                value = extractPrimitiveValue(element.getAsJsonPrimitive());
 
-                if (entry.getValue().getAsJsonPrimitive().isNumber()) {
-                    value = (double) entry.getValue().getAsJsonPrimitive().getAsDouble();
-                } else if (entry.getValue().getAsJsonPrimitive().isString()) {
-                    value = (String) entry.getValue().getAsJsonPrimitive().getAsString();
-                } else if (entry.getValue().getAsJsonPrimitive().isBoolean()) {
-                    value = (Boolean) entry.getValue().getAsJsonPrimitive().getAsBoolean();
-                }
-                answerList.add(Idea.createIdea(key, value, 0));
+                answerList.add(new Idea(key, value, 0));
 
-            } else if (entry.getValue().isJsonObject()) {
-                if (entry.getValue().getAsJsonObject().size() == 0) {
+            } else if (element.isJsonObject()) {
+                if (element.getAsJsonObject().size() == 0) {
                     continue;
                 }
-                Idea answer = Idea.createIdea(key, "", 0);
-                Object nested = createIdeaFromJson(entry.getValue().getAsJsonObject());
+                Idea answer = new Idea(key, "", 0);
+                Object nested = createIdeaFromJson(element.getAsJsonObject());
 
                 if (nested instanceof ArrayList) {
                     for (Object idea : (ArrayList)nested){
@@ -447,12 +450,28 @@ public class SOARPlugin {
                     answer.add((Idea) nested);
                 }
                 answerList.add(answer);
+            } else if(element.isJsonArray()) {
+                for (JsonElement arrElem : element.getAsJsonArray()) {
+                    if (arrElem.isJsonObject()) {
+                        Object nested = createIdeaFromJson(arrElem.getAsJsonObject());
+                        Idea idea = new Idea(key, "", 0); // mantém o nome original da chave
+                        if (nested instanceof ArrayList) {
+                            for (Object obj : (ArrayList<?>) nested) {
+                                idea.add((Idea) obj);
+                            }
+                        } else {
+                            idea.add((Idea) nested);
+                        }
+                        answerList.add(idea);
+                    } else if (arrElem.isJsonPrimitive()) {
+                        value = extractPrimitiveValue(arrElem.getAsJsonPrimitive());
+                        answerList.add(new Idea(key, value, 0));
+                    }
+                }
+
             }
         }
-        if (answerList.size() == 1){
-            return answerList.get(0);
-        }
-        return answerList;
+        return answerList.size() == 1 ? answerList.get(0) : answerList;
     }
 
 
@@ -650,20 +669,11 @@ public class SOARPlugin {
         Iterator<Wme> It = id.getWmes();
         if (!It.hasNext()) {
             // This situation happens when the OutputLink is empty
-            newwo = Idea.createIdea(name,"",0);
+            newwo = new Idea(name,"",0);
         }
         while (It.hasNext()) {
-            boolean shouldReuseIdea;
             if (newwo == null) {
-                String currentIdName = id.getNameLetter() + Long.toString(id.getNameNumber());
-                Idea existingIdea = Idea.repo.get(name +"."+phase);
-                if (existingIdea == null){
-                    shouldReuseIdea = false;
-                } else {
-                    String existingIdName = (String) existingIdea.getValue();
-                    shouldReuseIdea = existingIdName.equals(currentIdName);
-                }
-                newwo = shouldReuseIdea ? Idea.createIdea(name, currentIdName, phase) : new Idea(name, currentIdName, phase);
+                newwo = new Idea(name, "", phase);
             }
 
             Wme wme = It.next();
