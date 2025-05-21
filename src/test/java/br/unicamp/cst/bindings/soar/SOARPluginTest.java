@@ -47,7 +47,7 @@ public class SOARPluginTest {
             soarPlugin.setInputLinkIdentifier(soarPlugin.getAgent().getInputOutput().getInputLink());
         } catch (SoarException e) {
             e.printStackTrace();
-        }
+        } 
 
         soarPlugin.setInputLinkIdea((Idea)soarPlugin.createIdeaFromJson(jsonInput));
         soarPlugin.runSOAR();
@@ -815,7 +815,7 @@ public class SOARPluginTest {
         soarPlugin2.setOutputLinkIdea((Idea)soarPlugin1.createIdeaFromJson(jsonInput));
         Idea soar2 = soarPlugin2.getWorldObject(soarPlugin1.getOutputLinkIdentifier(), soarPlugin2.getAgentName());
 
-        assertEquals(soar1, soar2);
+        assertTrue(soar1.equals(soar2));
     }
 
     @Test
