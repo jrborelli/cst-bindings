@@ -81,6 +81,7 @@ public abstract class RosTopicSubscriberCodelet<T extends Message> extends Codel
     public void proc() {
         if (latestMessage != null && sensoryMemory != null) {
             fillMemoryWithReceivedMessage(latestMessage, sensoryMemory);
+            latestMessage = null; // consume message to avoid processing it multiple times
         }
     }
 
