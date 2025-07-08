@@ -8,6 +8,9 @@
  * Contributors:
  * K. Raizer, A. L. O. Paraense, E. M. Froes, R. R. Gudwin - initial API and implementation
  ***********************************************************************************************/
+
+package br.unicamp.cst.bindings.ros2java;
+
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.Memory;
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
