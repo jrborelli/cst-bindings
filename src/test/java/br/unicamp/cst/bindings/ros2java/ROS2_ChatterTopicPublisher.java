@@ -9,14 +9,14 @@ import id.jrosmessages.std_msgs.StringMessage;
 import java.net.URI;
 
 /**
- * @author renato
+ * @author jrborelli
  *
  */
 
 
-public class ChatterTopicPublisher extends RosTopicPublisherCodelet<StringMessage> {
+public class ROS2_ChatterTopicPublisher extends RosTopicPublisherCodelet<StringMessage> {
 
-    public ChatterTopicPublisher(String topic) {
+    public ROS2_ChatterTopicPublisher(String topic) {
         super(topic, StringMessage.class);
     }
 
@@ -29,9 +29,9 @@ public class ChatterTopicPublisher extends RosTopicPublisherCodelet<StringMessag
     protected void fillMessageToBePublished(Memory motorMemory, StringMessage message) {
         Object data = motorMemory.getI();
         if (data instanceof String) {
-            message.setData((String) data);
+            message.withData((String) data);
         } else {
-            message.setData("");
+            message.withData("");
         }
     }
 }

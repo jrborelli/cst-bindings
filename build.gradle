@@ -64,6 +64,7 @@ dependencies {
    // JROS:
    //implementation 'io.github.lambdaprime:jroscommon:1.0'
     implementation 'io.github.lambdaprime:jros2client:12.0'
+    //implementation 'io.github.lambdaprime:jrosmessages-std_msgs:<version>'
     implementation 'io.github.pinorobotics:jros2services:8.0'
    
    //implementation 'ch.qos.logback:logback-classic:1.3.6'

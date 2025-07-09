@@ -1,5 +1,5 @@
 /**
- * 
+ * @author jrborelli
  */
 package br.unicamp.cst.bindings.ros2java;
 
@@ -9,14 +9,12 @@ import id.jrosmessages.std_msgs.StringMessage;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import pinorobotics.jrosservices.msgs.ServiceDefinition;
+import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertEquals;
-
-public class RosJavaTest {
+public class Ros2JavaTest {
 
     private static Mind mind;
 
@@ -34,19 +32,17 @@ public class RosJavaTest {
 
     @Test
     public void testRos2Topics() throws InterruptedException {
-        // Setup subscriber codelet for "chatter"
         RosTopicSubscriberCodelet<StringMessage> subscriber = new RosTopicSubscriberCodelet<>("chatter", StringMessage.class) {
             @Override
             public void fillMemoryWithReceivedMessage(StringMessage message, br.unicamp.cst.core.entities.Memory sensoryMemory) {
-                sensoryMemory.setI(message.getData());
-                System.out.println("I heard: \"" + message.getData() + "\"");
+                sensoryMemory.setI(message.data);
+                System.out.println("I heard: \"" + message.data + "\"");
             }
         };
         MemoryObject sensoryMemory = mind.createMemoryObject(subscriber.getName());
         subscriber.addOutput(sensoryMemory);
         mind.insertCodelet(subscriber);
 
-        // Setup publisher codelet for "chatter"
         RosTopicPublisherCodelet<StringMessage> publisher = new RosTopicPublisherCodelet<>("chatter", StringMessage.class) {
             @Override
             protected StringMessage createNewMessage() {
@@ -57,60 +53,50 @@ public class RosJavaTest {
             protected void fillMessageToBePublished(br.unicamp.cst.core.entities.Memory motorMemory, StringMessage message) {
                 String data = (String) motorMemory.getI();
                 if (data != null) {
-                    message.setData(data);
+                    message.data = data;
                 }
             }
         };
         MemoryObject motorMemory = mind.createMemoryObject(publisher.getName());
         publisher.addInput(motorMemory);
 
-        // Set the message to publish
+        // Send the message
         String expectedMessage = "Hello World";
         motorMemory.setI(expectedMessage);
         mind.insertCodelet(publisher);
-
         mind.start();
 
-        // Wait some time to allow message flow
-        Thread.sleep(3000);
+        Thread.sleep(3000); // allow some time for message exchange
 
         String actualMessage = (String) sensoryMemory.getI();
-
         assertEquals(expectedMessage, actualMessage);
 
         mind.shutDown();
-
-        // Wait to let shutdown complete
         Thread.sleep(2000);
     }
 
     @Test
     public void testRos2ServiceSync() throws InterruptedException, ExecutionException, TimeoutException {
-        // Start the service node in the background (you'll need to implement it separately)
-        AddTwoIntServiceRos2 addTwoIntService = new AddTwoIntServiceRos2();
-        addTwoIntService.start();
+        // You must already have the Python/C++ ROS 2 service running (troca_ros/AddTwoIntsService)
 
-        Thread.sleep(2000); // Wait for service to be ready
-
-        AddTwoIntServiceClientSyncRos2 clientSync = new AddTwoIntServiceClientSyncRos2("add_two_ints");
+        // Start the client
+        AddTwoIntsServiceClientSyncRos2 clientSync = new AddTwoIntsServiceClientSyncRos2("add_two_ints");
         clientSync.start();
 
-        // Test call 1
+        // First test
         long expectedSum1 = 5L;
-        Integer[] args1 = new Integer[] {2, 3};
-        long actualSum1 = clientSync.callService(args1).getSum();
+        Object[] args1 = new Object[]{2L, 3L};
+        AddTwoIntsResponseMessage response1 = clientSync.callService(args1);
+        long actualSum1 = response1.sum;
         assertEquals(expectedSum1, actualSum1);
 
-        // Test call 2
+        // Second test
         long expectedSum2 = 6L;
-        Integer[] args2 = new Integer[] {2, 4};
-        long actualSum2 = clientSync.callService(args2).getSum();
+        Object[] args2 = new Object[]{2L, 4L};
+        AddTwoIntsResponseMessage response2 = clientSync.callService(args2);
+        long actualSum2 = response2.sum;
         assertEquals(expectedSum2, actualSum2);
 
         clientSync.stop();
-        addTwoIntService.stop();
     }
-
-    // You can add more tests for asynchronous clients similarly
-
 }

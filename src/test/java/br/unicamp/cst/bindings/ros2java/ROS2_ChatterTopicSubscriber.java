@@ -8,14 +8,14 @@ import br.unicamp.cst.core.entities.Memory;
 import id.jrosmessages.std_msgs.StringMessage;
 
 /**
- * @author andre
+ * @author jrborelli
  *
  */
 
 
-public class ChatterTopicSubscriber extends RosTopicSubscriberCodelet<StringMessage> {
+public class ROS2_ChatterTopicSubscriber extends RosTopicSubscriberCodelet<StringMessage> {
 
-    public ChatterTopicSubscriber(String topic) {
+    public ROS2_ChatterTopicSubscriber(String topic) {
         super(topic, StringMessage.class);
     }
 
@@ -23,7 +23,7 @@ public class ChatterTopicSubscriber extends RosTopicSubscriberCodelet<StringMess
     public void fillMemoryWithReceivedMessage(StringMessage message, Memory sensoryMemory) {
         if (message == null || sensoryMemory == null) return;
 
-        String data = message.getData();
+        String data = message.data;
         sensoryMemory.setI(data);
         System.out.println("Received chatter message: " + data);
     }
