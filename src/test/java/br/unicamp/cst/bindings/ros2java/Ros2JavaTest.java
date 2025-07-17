@@ -3,6 +3,7 @@
  */
 package br.unicamp.cst.bindings.ros2java;
 
+import br.unicamp.cst.core.entities.Memory;
 import br.unicamp.cst.core.entities.MemoryObject;
 import br.unicamp.cst.core.entities.Mind;
 import id.jrosmessages.std_msgs.StringMessage;
@@ -31,7 +32,9 @@ public class Ros2JavaTest {
     }
 
     @Test
+    
     public void testRos2Topics() throws InterruptedException {
+        
         RosTopicSubscriberCodelet<StringMessage> subscriber = new RosTopicSubscriberCodelet<>("chatter", StringMessage.class) {
             @Override
             public void fillMemoryWithReceivedMessage(StringMessage message, br.unicamp.cst.core.entities.Memory sensoryMemory) {
@@ -39,16 +42,13 @@ public class Ros2JavaTest {
                 System.out.println("I heard: \"" + message.data + "\"");
             }
         };
-        MemoryObject sensoryMemory = mind.createMemoryObject(subscriber.getName());
-        subscriber.addOutput(sensoryMemory);
-        mind.insertCodelet(subscriber);
+        
 
         RosTopicPublisherCodelet<StringMessage> publisher = new RosTopicPublisherCodelet<>("chatter", StringMessage.class) {
             @Override
             protected StringMessage createNewMessage() {
                 return new StringMessage();
             }
-
             @Override
             protected void fillMessageToBePublished(br.unicamp.cst.core.entities.Memory motorMemory, StringMessage message) {
                 String data = (String) motorMemory.getI();
@@ -57,23 +57,32 @@ public class Ros2JavaTest {
                 }
             }
         };
-        MemoryObject motorMemory = mind.createMemoryObject(publisher.getName());
+        
+
+        MemoryObject sensoryMemory = mind.createMemoryObject("chatter");
+        subscriber.addOutput(sensoryMemory);
+
+        MemoryObject motorMemory = mind.createMemoryObject("chatter");
         publisher.addInput(motorMemory);
 
         // Send the message
         String expectedMessage = "Hello World";
         motorMemory.setI(expectedMessage);
+
+        mind.insertCodelet(subscriber);
         mind.insertCodelet(publisher);
         mind.start();
 
-        Thread.sleep(3000); // allow some time for message exchange
-
+        Thread.sleep(4000); // allow some time for message exchange
+         
         String actualMessage = (String) sensoryMemory.getI();
         assertEquals(expectedMessage, actualMessage);
 
+        //Thread.sleep(500);
+        
         mind.shutDown();
-        Thread.sleep(2000);
-    }
+    }  
+    
 
     @Test
     public void testRos2ServiceSync() throws InterruptedException, ExecutionException, TimeoutException {
