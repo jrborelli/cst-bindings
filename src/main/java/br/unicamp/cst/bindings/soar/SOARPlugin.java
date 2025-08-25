@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.jsoar.kernel.Agent;
 import org.jsoar.kernel.Phase;
 import org.jsoar.kernel.RunType;
@@ -55,8 +56,6 @@ public class SOARPlugin {
     private File productionPath;
     private String inputLinkAsString = "";
     private String outputLinkAsString = "";
-    private String jsonOutputLinkAsString = "";
-
     private int phase = -1;
     private int debugState = 0;
 
@@ -248,39 +247,6 @@ public class SOARPlugin {
     public List<Wme> getInputLink_WME() {
         return Wmes.matcher(getAgent()).filter(getAgent().getInputOutput().getInputLink());
     }
-
-    public JsonObject getOutputLinkJSON() {
-        JsonObject json = new JsonObject();
-        try {
-            if (getAgent() != null) {
-                List<Wme> Commands = getOutputLink_WME();
-                setOutputLinkAsString(getWMEStringOutput());
-                for (Wme command : Commands) {
-                    String commandType = command.getAttribute().toString();
-                    json.add(commandType, new JsonObject());
-
-                    Iterator<Wme> children = command.getChildren();
-                    while (children.hasNext()) {
-                        Wme child = children.next();
-                        String parameter = child.getAttribute().toString();
-                        String parvalue = child.getValue().toString();
-                        Float floatvalue = tryParseFloat(parvalue);
-                        if (floatvalue != null) {
-                            json.get(commandType).getAsJsonObject().addProperty(parameter, floatvalue);
-                        } else {
-                            json.get(commandType).getAsJsonObject().addProperty(parameter, parvalue);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.severe("Error while creating SOAR Kernel" + e);
-        }
-        setJsonOutputLinkAsString(json.toString());
-        return (json);
-    }
-
-
     /**
      * Try Parse a Float Element
      *
@@ -354,58 +320,11 @@ public class SOARPlugin {
 
         return (li);
     }
-
-
-    public JsonObject createJsonFromString(String pathToLeaf, double value) {
-        String[] treeNodes = pathToLeaf.split("\\.");
-        JsonObject json = new JsonObject();
-
-        for (int i = treeNodes.length - 1; i >= 0; i--) {
-            JsonObject temp = new JsonObject();
-
-            if (i == treeNodes.length - 1) {
-                temp.addProperty(treeNodes[i], value);
-            } else {
-                temp.add(treeNodes[i], json);
-            }
-            json = temp;
-        }
-        return json;
-    }
-
-    public JsonObject createJsonFromString(String pathToLeaf, String value) {
-        String[] treeNodes = pathToLeaf.split("\\.");
-        JsonObject json = new JsonObject();
-
-        for (int i = treeNodes.length - 1; i >= 0; i--) {
-            JsonObject temp = new JsonObject();
-
-            if (i == treeNodes.length - 1) {
-                temp.addProperty(treeNodes[i], value);
-            } else {
-                temp.add(treeNodes[i], json);
-            }
-            json = temp;
-        }
-        return json;
-    }
-
-
-    public JsonObject createJsonFromString(String pathToLeaf, JsonObject value) {
-        String[] treeNodes = pathToLeaf.split("\\.");
-        JsonObject json = new JsonObject();
-
-        for (int i = treeNodes.length - 1; i >= 0; i--) {
-            JsonObject temp = new JsonObject();
-
-            if (i == treeNodes.length - 1) {
-                temp.add(treeNodes[i], value);
-            } else {
-                temp.add(treeNodes[i], json);
-            }
-            json = temp;
-        }
-        return json;
+    
+    private Object extractPrimitiveValue(JsonPrimitive primitive) {
+        if (primitive.isNumber()) return primitive.getAsDouble();
+        if (primitive.isBoolean()) return primitive.getAsBoolean();
+        return primitive.getAsString();
     }
 
     public Object createIdeaFromJson(JsonObject jsonInput){
@@ -418,24 +337,20 @@ public class SOARPlugin {
         while (itr.hasNext()) {
             entry = itr.next();
             String key = entry.getKey();
+            JsonElement element = entry.getValue();
 
-            if (entry.getValue().isJsonPrimitive()) {
+            if (element.isJsonPrimitive()) {
+                
+                value = extractPrimitiveValue(element.getAsJsonPrimitive());
 
-                if (entry.getValue().getAsJsonPrimitive().isNumber()) {
-                    value = (double) entry.getValue().getAsJsonPrimitive().getAsDouble();
-                } else if (entry.getValue().getAsJsonPrimitive().isString()) {
-                    value = (String) entry.getValue().getAsJsonPrimitive().getAsString();
-                } else if (entry.getValue().getAsJsonPrimitive().isBoolean()) {
-                    value = (Boolean) entry.getValue().getAsJsonPrimitive().getAsBoolean();
-                }
-                answerList.add(Idea.createIdea(key, value, 0));
+                answerList.add(new Idea(key, value, 0));
 
-            } else if (entry.getValue().isJsonObject()) {
-                if (entry.getValue().getAsJsonObject().size() == 0) {
+            } else if (element.isJsonObject()) {
+                if (element.getAsJsonObject().size() == 0) {
                     continue;
                 }
-                Idea answer = Idea.createIdea(key, "", 0);
-                Object nested = createIdeaFromJson(entry.getValue().getAsJsonObject());
+                Idea answer = new Idea(key, "", 0);
+                Object nested = createIdeaFromJson(element.getAsJsonObject());
 
                 if (nested instanceof ArrayList) {
                     for (Object idea : (ArrayList)nested){
@@ -446,89 +361,28 @@ public class SOARPlugin {
                     answer.add((Idea) nested);
                 }
                 answerList.add(answer);
+            } else if(element.isJsonArray()) {
+                for (JsonElement arrElem : element.getAsJsonArray()) {
+                    if (arrElem.isJsonObject()) {
+                        Object nested = createIdeaFromJson(arrElem.getAsJsonObject());
+                        Idea idea = new Idea(key, "", 0); // mantém o nome original da chave
+                        if (nested instanceof ArrayList) {
+                            for (Object obj : (ArrayList<?>) nested) {
+                                idea.add((Idea) obj);
+                            }
+                        } else {
+                            idea.add((Idea) nested);
+                        }
+                        answerList.add(idea);
+                    } else if (arrElem.isJsonPrimitive()) {
+                        value = extractPrimitiveValue(arrElem.getAsJsonPrimitive());
+                        answerList.add(new Idea(key, value, 0));
+                    }
+                }
+
             }
         }
-        if (answerList.size() == 1){
-            return answerList.get(0);
-        }
-        return answerList;
-    }
-
-
-    public void addBranchToJson(String newBranch, JsonObject json, double value) {
-        String[] newNodes = newBranch.split("\\.");
-        JsonObject temp;
-
-        if (newNodes.length > 1) {
-            if (json.has(newNodes[0])) {
-                addBranchToJson(newBranch.substring(newNodes[0].length() + 1), json.getAsJsonObject(newNodes[0]), value);
-            } else {
-                temp = createJsonFromString(newBranch.substring(newNodes[0].length() + 1), value);
-                json.add(newNodes[0], temp);
-            }
-        } else {
-            json.addProperty(newNodes[0], value);
-        }
-    }
-
-    public void addBranchToJson(String newBranch, JsonObject json, String value) {
-        String[] newNodes = newBranch.split("\\.");
-        JsonObject temp;
-
-        if (newNodes.length > 1) {
-            if (json.has(newNodes[0])) {
-                addBranchToJson(newBranch.substring(newNodes[0].length() + 1), json.getAsJsonObject(newNodes[0]), value);
-            } else {
-                temp = createJsonFromString(newBranch.substring(newNodes[0].length() + 1), value);
-                json.add(newNodes[0], temp);
-            }
-        } else {
-            json.addProperty(newNodes[0], value);
-        }
-    }
-
-    public void addBranchToJson(String newBranch, JsonObject json, JsonObject value) {
-        String[] newNodes = newBranch.split("\\.");
-        JsonObject temp;
-        if (newNodes.length > 1) {
-            if (json.has(newNodes[0])) {
-                addBranchToJson(newBranch.substring(newNodes[0].length() + 1), json.getAsJsonObject(newNodes[0]), value);
-            } else {
-                temp = createJsonFromString(newBranch.substring(newNodes[0].length() + 1), value);
-                json.add(newNodes[0], temp);
-            }
-        } else {
-            json.add(newNodes[0], value);
-        }
-    }
-
-
-    public void removeBranchFromJson(String pathToOldBranch, JsonObject json) {
-        String[] oldNodes = pathToOldBranch.split("\\.");
-        if (oldNodes.length > 1) {
-            if (json.has(oldNodes[0])) {
-                removeBranchFromJson(pathToOldBranch.substring(oldNodes[0].length() + 1), json.getAsJsonObject(oldNodes[0]));
-            }
-        } else {
-            json.remove(oldNodes[0]);
-        }
-    }
-
-
-
-    public JsonObject fromBeanToJson(Object bean) {
-        JsonObject json = new JsonObject();
-        Class<?> type = bean.getClass();
-
-        json.add(type.getName(), new JsonObject());
-        try {
-            for (Field field : type.getDeclaredFields()) {
-                json.get(type.getName()).getAsJsonObject().addProperty(field.getName(), field.get(bean).toString());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return json;
+        return answerList.size() == 1 ? answerList.get(0) : answerList;
     }
 
     public boolean containsWme(final List<Wme> list, final String name) {
@@ -649,12 +503,11 @@ public class SOARPlugin {
         Iterator<Wme> It = id.getWmes();
         if (!It.hasNext()) {
             // This situation happens when the OutputLink is empty
-            newwo = Idea.createIdea(name,"",0);
+            newwo = new Idea(name,"",0);
         }
         while (It.hasNext()) {
-
             if (newwo == null) {
-                newwo = Idea.createIdea(name,"",phase);
+                newwo = new Idea(name, "", phase);
             }
 
             Wme wme = It.next();
@@ -662,7 +515,7 @@ public class SOARPlugin {
             Symbol v = wme.getValue();
             Identifier testv = v.asIdentifier();
             if (testv != null) { // The value is an identifier
-                Idea child = getWorldObject(testv, a.toString());
+                Idea child = getWorldObject(testv, name + "." + a.toString());
                 newwo.add(child);
             } else { // The value is a property
                 Idea qd;
@@ -671,8 +524,7 @@ public class SOARPlugin {
                 else if (v.asInteger() != null) value = v.asInteger().getValue();
                 else value = v.toString();
                 qd = new Idea(a.toString(), value);
-                Idea pp = new Idea(a.toString(), qd);
-                newwo.add(pp);
+                newwo.add(qd);
             }
         }
         return (newwo);
@@ -682,7 +534,7 @@ public class SOARPlugin {
         Identifier ol = getAgent().getInputOutput().getOutputLink();
         if (ol == null) logger.severe("Error in cst.SOARPlugin: Unable to get access to OutputLink");
 
-        Idea olao = getWorldObject(ol, "OutputLink");
+        Idea olao = getWorldObject(ol, agentName + ".OutputLink");
         setOutputLinkIdea(olao);
     }
 
@@ -698,7 +550,7 @@ public class SOARPlugin {
         if (il != null) {
             List<Idea> parts = il.getL();
             for (Idea w : parts) {
-                if (w.getValue().equals("") ){
+                if (w.getValue() == null || w.getValue().equals("")){
                     Identifier id2 = createIdWME(id, w.getName());
                     processInputLink(w, id2);
                 }
@@ -970,14 +822,6 @@ public class SOARPlugin {
 
     public void setDebugState(int debugState) {
         this.debugState = debugState;
-    }
-
-    public String getJsonOutputLinkAsString() {
-        return jsonOutputLinkAsString;
-    }
-
-    public void setJsonOutputLinkAsString(String jsonOutputLinkAsString) {
-        this.jsonOutputLinkAsString = jsonOutputLinkAsString;
     }
 
     public List<Identifier> getOperatorsPathList() {

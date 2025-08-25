@@ -109,7 +109,7 @@ public abstract class JSoarCodelet extends Codelet {
                     for (Field field : type.getDeclaredFields()) {
                         if (p.getName().equals(field.getName())) {
                            if(p.getL().isEmpty()){
-                               Object value = ((Idea) p.getValue()).getValue();
+                               Object value = p.getValue();
                                if (Doubles.tryParse(value.toString()) != null) {
                                    Double fvalue = Doubles.tryParse(value.toString());
                                    field.set(commandObject, fvalue);
@@ -139,79 +139,13 @@ public abstract class JSoarCodelet extends Codelet {
         return arrayList.size() > 0 ? arrayList : commandObject;
     }
 
-    
-    public ArrayList<Object> getCommandsJSON(String package_with_beans_classes){
-        ArrayList<Object> commandList = new ArrayList<Object>();
-        JsonObject templist = getJsoar().getOutputLinkJSON();
-        Set<Map.Entry<String,JsonElement>> set = templist.entrySet();
-        Iterator <Entry<String,JsonElement>> it = set.iterator();
-        while(it.hasNext()){
-            Entry<String,JsonElement> entry = it.next();
-            String key = entry.getKey();
-            JsonObject commandtype = entry.getValue().getAsJsonObject();
-            try{
-                Class type = Class.forName(package_with_beans_classes+"."+key);
-                Object command = type.newInstance();
-                type.cast(command);
-                for(Field field : type.getDeclaredFields()){
-                    if(commandtype.has(field.getName())){
-                        if(commandtype.get(field.getName()).getAsJsonPrimitive().isNumber()){
-                            field.set(command, commandtype.get(field.getName()).getAsFloat());
-                        }else{
-                            field.set(command, commandtype.get(field.getName()).getAsString());
-                        }
-                    }
-                }
-                commandList.add(command);
-                
-            }catch(Exception e){
-                 e.printStackTrace();
-            }
-        }
-        return commandList;
-    }
-
     public List<Identifier> getOperatorsPathList(){
         return getJsoar().getOperatorsPathList();
-    }
-    
-    public JsonObject createJson(String pathToLeaf, Object value){
-        JsonObject json = new JsonObject();
-        if(value instanceof String){
-            String specvalue =(String)value;
-            json = getJsoar().createJsonFromString(pathToLeaf,specvalue);
-        }
-        else if(value instanceof Number){
-            double specvalue = (double) (int) value;
-            json = getJsoar().createJsonFromString(pathToLeaf,specvalue);
-        }
-        return json;
     }
     
     public void addToJson(JsonObject newBranch, JsonObject json, String property){
         json.add(property, newBranch);
     }
-
-    public void addToJson(String newBranch, JsonObject json, Object value){
-        if(value==null){
-            JsonObject specvalue =(JsonObject)value;
-            getJsoar().addBranchToJson(newBranch, json, specvalue);
-            return;
-        }
-        if(value instanceof String){
-            String specvalue =(String)value;
-            getJsoar().addBranchToJson(newBranch, json, specvalue);
-        }
-        else if(value instanceof  Number){
-            Double specvalue =(Double)value;
-            getJsoar().addBranchToJson(newBranch, json, specvalue);
-        }
-        else{
-            JsonObject specvalue = (JsonObject)value;
-            getJsoar().addBranchToJson(newBranch, json, specvalue);
-        }
-    }
-
     
     public void setInputLinkJson(JsonObject json){
         getJsoar().setInputLinkIdea((Idea)getJsoar().createIdeaFromJson(json));
@@ -220,11 +154,6 @@ public abstract class JSoarCodelet extends Codelet {
     public void setInputLinkIdea(Idea wo){
         getJsoar().setInputLinkIdea(wo);
     }
-
-    public void removeJson(String pathToOldBranch, JsonObject json){
-        getJsoar().removeBranchFromJson(pathToOldBranch, json);
-    }
-
     public String getAgentName() {
         return agentName;
     }
