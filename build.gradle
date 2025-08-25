@@ -36,6 +36,9 @@ repositories {
         url "https://artifacts.camunda.com/artifactory/public/"
     }
     maven { url 'https://jitpack.io' }
+    maven {
+        url 'https://cst-group.github.io/cst-dependencies/maven-repo/'
+    }
 }
 
 configurations {
