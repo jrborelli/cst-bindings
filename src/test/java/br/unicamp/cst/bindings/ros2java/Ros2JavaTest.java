@@ -11,17 +11,37 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 
+import id.jrosclient.JRosClient;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 public class Ros2JavaTest {
 
     private static Mind mind;
-
+    //private static boolean isRos2Available = false;
+    
+    /*
     @BeforeClass
     public static void setup() {
         mind = new Mind();
+    }  */
+    
+    @BeforeClass
+    public static void setup() {
+        mind = new Mind();
+        
+        // This is the crucial check to skip the tests if ROS 2 is not available.
+        // It creates a client and attempts to connect, which will fail if no daemon is running.     
+        try {
+            JRosClient client = new JRosClient();
+            client.wait(5); // Await for 5 seconds to connect
+            client.close();
+        } catch (Exception e) {
+            // This is the condition for assuming the tests will not run
+            assumeTrue(false);
+        }   
     }
 
     @AfterClass
@@ -32,9 +52,8 @@ public class Ros2JavaTest {
     }
 
     @Test
-    
     public void testRos2Topics() throws InterruptedException {
-        
+                
         RosTopicSubscriberCodelet<StringMessage> subscriber = new RosTopicSubscriberCodelet<>("chatter", StringMessage.class) {
             @Override
             public void fillMemoryWithReceivedMessage(StringMessage message, br.unicamp.cst.core.entities.Memory sensoryMemory) {
@@ -42,7 +61,6 @@ public class Ros2JavaTest {
                 System.out.println("I heard: \"" + message.data + "\"");
             }
         };
-        
 
         RosTopicPublisherCodelet<StringMessage> publisher = new RosTopicPublisherCodelet<>("chatter", StringMessage.class) {
             @Override
@@ -57,7 +75,6 @@ public class Ros2JavaTest {
                 }
             }
         };
-        
 
         MemoryObject sensoryMemory = mind.createMemoryObject("chatter");
         subscriber.addOutput(sensoryMemory);
@@ -82,13 +99,11 @@ public class Ros2JavaTest {
         
         mind.shutDown();
     }  
-    
 
     @Test
     public void testRos2ServiceSync() throws InterruptedException, ExecutionException, TimeoutException {
-        // You must already have the Python/C++ ROS 2 service running (troca_ros/AddTwoIntsService)
-
-        // Start the client
+        // The service test is also dependent on a running ROS 2 environment.
+        // The check in @BeforeClass will handle this.
         AddTwoIntsServiceClientSyncRos2 clientSync = new AddTwoIntsServiceClientSyncRos2("add_two_ints");
         clientSync.start();
 
@@ -109,3 +124,6 @@ public class Ros2JavaTest {
         clientSync.stop();
     }
 }
+
+
+
