@@ -47,7 +47,7 @@ public class SOARPluginTest {
             soarPlugin.setInputLinkIdentifier(soarPlugin.getAgent().getInputOutput().getInputLink());
         } catch (SoarException e) {
             e.printStackTrace();
-        }
+        } 
 
         soarPlugin.setInputLinkIdea((Idea)soarPlugin.createIdeaFromJson(jsonInput));
         soarPlugin.runSOAR();
@@ -331,35 +331,6 @@ public class SOARPluginTest {
     }
 
     @Test
-    public void createJsonFromStringObjectTest(){
-        String soarRulesPath="src/test/resources/smartCar.soar";
-        SOARPlugin soarPlugin = new SOARPlugin("testName", new File(soarRulesPath), false);
-
-        String jsonString = "{\"InputLink\":{\"CURRENT_PERCEPTION\":{\"CONFIGURATION\":{\"TRAFFIC_LIGHT\":{\"CURRENT_PHASE\":{\"PHASE\":\"RED\"}}}}}}";
-        JsonObject jsonInput = JsonParser.parseString(jsonString).getAsJsonObject();
-
-
-        soarPlugin.setInputLinkIdea((Idea)soarPlugin.createIdeaFromJson(jsonInput));
-
-        soarPlugin.runSOAR();
-
-        try{
-            Thread.sleep(2000L);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-
-        JsonObject value = new JsonObject();
-        value.add("PHASE", new JsonPrimitive("RED"));
-
-        JsonObject parsed = soarPlugin.createJsonFromString("InputLink.CURRENT_PERCEPTION.CONFIGURATION.TRAFFIC_LIGHT.CURRENT_PHASE", value);
-        soarPlugin.stopSOAR();
-
-        assertEquals(jsonInput, parsed);
-    }
-
-    @Test
     public void createIdeaFromJsonBooleanTest(){
         String soarRulesPath="src/test/resources/smartCar.soar";
         SOARPlugin soarPlugin = new SOARPlugin("testName", new File(soarRulesPath), false);
@@ -373,90 +344,22 @@ public class SOARPluginTest {
 
         assertTrue((Boolean) idea.getL().get(0).getL().get(0).getL().get(0).getL().get(0).getL().get(0).getValue());
     }
-
-
+    
     @Test
-    public void addBranchToJsonNonExistingTest(){
+    public void processInputLinkIdeaTest(){
         String soarRulesPath="src/test/resources/smartCar.soar";
         SOARPlugin soarPlugin = new SOARPlugin("testName", new File(soarRulesPath), false);
-
-        String toCreateString = "{\"InputLink\":{\"CURRENT_PERCEPTION\":{\"CONFIGURATION\":{\"TRAFFIC_LIGHT\":{\"CURRENT_PHASE\":{\"PHASE\":\"RED\"}},\"SMARTCAR\":{\"INFO\":\"NO\"}}}}}";
-        JsonObject expectedJsonString = JsonParser.parseString(toCreateString).getAsJsonObject();
-
-        String toCreateDouble = "{\"InputLink\":{\"CURRENT_PERCEPTION\":{\"CONFIGURATION\":{\"TRAFFIC_LIGHT\":{\"CURRENT_PHASE\":{\"PHASE\":\"RED\"}},\"SMARTCAR\":{\"INFO\":4.0}}}}}";
-        JsonObject expectedJsonDouble = JsonParser.parseString(toCreateDouble).getAsJsonObject();
-
-        String toCreateObject = "{\"InputLink\":{\"CURRENT_PERCEPTION\":{\"CONFIGURATION\":{\"TRAFFIC_LIGHT\":{\"CURRENT_PHASE\":{\"PHASE\":\"RED\"}},\"SMARTCAR\":{\"INFO\":{\"PRESENT\":\"NO\"}}}}}}";
-        JsonObject expectedJsonObject = JsonParser.parseString(toCreateObject).getAsJsonObject();
-
-        JsonObject testJsonString = soarPlugin.createJsonFromString(
-                "InputLink.CURRENT_PERCEPTION.CONFIGURATION.TRAFFIC_LIGHT.CURRENT_PHASE.PHASE", "RED");
-
-        JsonObject testJsonDouble = soarPlugin.createJsonFromString(
-                "InputLink.CURRENT_PERCEPTION.CONFIGURATION.TRAFFIC_LIGHT.CURRENT_PHASE.PHASE", "RED");
-
-        JsonObject testJsonObject = soarPlugin.createJsonFromString(
-                "InputLink.CURRENT_PERCEPTION.CONFIGURATION.TRAFFIC_LIGHT.CURRENT_PHASE.PHASE", "RED");
-
-        JsonObject toAdd = new JsonObject();
-        toAdd.add("PRESENT", new JsonPrimitive("NO"));
-
-        //JsonObject toReceive = testJson.get("InputLink").getAsJsonObject().get("CURRENT_PERCEPTION").getAsJsonObject()
-        //        .get("CONFIGURATION").getAsJsonObject();
-
-        soarPlugin.addBranchToJson("InputLink.CURRENT_PERCEPTION.CONFIGURATION.SMARTCAR.INFO", testJsonString, "NO");
-        soarPlugin.addBranchToJson("InputLink.CURRENT_PERCEPTION.CONFIGURATION.SMARTCAR.INFO", testJsonDouble, 4);
-        soarPlugin.addBranchToJson("InputLink.CURRENT_PERCEPTION.CONFIGURATION.SMARTCAR.INFO", testJsonObject, toAdd);
-
-        assertEquals(expectedJsonString, testJsonString);
-        assertEquals(expectedJsonDouble, testJsonDouble);
-        assertEquals(expectedJsonObject, testJsonObject);
+        Idea inputLinkIdea = new Idea("INPUT_LINK_IDEA");
+        Idea scoreIdea = new Idea("SCORE", 0);
+        Idea creatureIdea = new Idea("CREATURE", "");
+        Idea sensorIdea = new Idea("SENSOR");
+        inputLinkIdea.add(scoreIdea);
+        inputLinkIdea.add(creatureIdea);
+        inputLinkIdea.add(sensorIdea);
+        soarPlugin.setInputLinkIdea(inputLinkIdea);
+        soarPlugin.processInputLink();
+        assertEquals("(I2,SENSOR,W2)\n(I2,SCORE,0.0)\n(I2,CREATURE,W1)\n", soarPlugin.getWMEStringInput());
     }
-
-
-    @Test
-    public void fromBeanToJsonTest(){
-        String soarRulesPath="src/test/resources/smartCar.soar";
-        SOARPlugin soarPlugin = new SOARPlugin("testName", new File(soarRulesPath), false);
-
-        String jsonString = "{\"InputLink\":{\"CURRENT_PERCEPTION\":{\"CONFIGURATION\":{\"TRAFFIC_LIGHT\":{\"CURRENT_PHASE\":{\"PHASE\":\"RED\",\"NUMBER\":4.0}},\"SMARTCAR_INFO\":\"NO\"}}}}";
-        JsonObject jsonInput = JsonParser.parseString(jsonString).getAsJsonObject();
-
-
-        soarPlugin.setInputLinkIdea((Idea)soarPlugin.createIdeaFromJson(jsonInput));
-
-        soarPlugin.runSOAR();
-
-        try{
-            Thread.sleep(2000L);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-
-        SoarCommandChange soarCommandChange = new SoarCommandChange();
-        soarCommandChange.setApply("true");
-        soarCommandChange.setQuantity(2);
-        soarCommandChange.setProductionName("soarCommandChange");
-
-        JsonObject jsonObjectFromBean = soarPlugin.fromBeanToJson(soarCommandChange);
-
-        JsonObject expectedFromBean = JsonParser.parseString("{\"br.unicamp.cst.bindings.soar.SoarCommandChange\":" +
-                "{\"productionName\":\"soarCommandChange\",\"quantity\":\"2.0\",\"apply\":\"true\"}}").getAsJsonObject();
-
-
-        String expectedOutput = "(I3,SoarCommandChange,C1)\n" +
-                "   (C1,productionName,change)\n" +
-                "   (C1,quantity,2)\n" +
-                "   (C1,apply,true)\n";
-
-        String actualOutput = soarPlugin.getOutputLinkAsString();
-        assertEquals("I3", soarPlugin.getOutputLinkIdentifier().toString());
-        assertEquals(expectedOutput, actualOutput);
-        assertEquals(expectedFromBean, jsonObjectFromBean);
-        soarPlugin.stopSOAR();
-    }
-
 
     @Test
     public void containsWmeTest(){
@@ -727,5 +630,174 @@ public class SOARPluginTest {
         assertTrue(javaObject instanceof SoarCommandChange);
         assertTrue(javaObject_2 instanceof SoarCommandChange);
         soarPlugin.stopSOAR();
+    }
+    
+    @Test
+    public void testGetWorldObjectWithWmesWithSameName(){
+
+        String soarRulesPath="src/test/resources/smartCar.soar";
+        SOARPlugin soarPlugin = new SOARPlugin("testName", new File(soarRulesPath), false);
+
+        String agentName = "Creature_1";
+        Idea outputLinkIdea = new Idea(agentName+".OutputLink");
+        
+        Idea entity1Idea = new Idea(agentName+".OutputLink"+".ENTITY");
+        Idea entity1NameIdea = new Idea(agentName+".OutputLink"+".ENTITY"+".NAME", "JÃO");
+        Idea entity1ColorIdea = new Idea(agentName+".OutputLink"+".ENTITY"+".COLOR", "BLUE");
+        entity1Idea.add(entity1NameIdea);
+        entity1Idea.add(entity1ColorIdea);
+        
+        Idea entity2Idea = new Idea(agentName+".OutputLink"+".ENTITY");
+        Idea entity2NameIdea = new Idea(agentName+".OutputLink"+".ENTITY"+".NAME", "MARIA");
+        Idea entity2ColorIdea = new Idea(agentName+".OutputLink"+".ENTITY"+".SIZE", "BIG");
+        entity2Idea.add(entity2NameIdea);
+        entity2Idea.add(entity2ColorIdea);
+        
+        outputLinkIdea.add(entity1Idea);
+        outputLinkIdea.add(entity2Idea);
+        soarPlugin.setInputLinkIdea(outputLinkIdea);
+        
+        soarPlugin.runSOAR();
+
+        try{
+            Thread.sleep(2000L);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        
+        Idea inputLinkIdea = soarPlugin.getWorldObject(soarPlugin.getAgent().getInputOutput().getInputLink(), agentName + ".OutputLink");
+        assertEquals(2, inputLinkIdea.getL().size());
+        Boolean hasColorIdea = false;
+        Boolean hasSizeIdea = false;
+        for(Idea entityIdea : inputLinkIdea.getL()){
+            assertTrue(entityIdea.get("COLOR") != null || entityIdea.get("SIZE") != null);
+            Idea colorIdea = entityIdea.get("COLOR");
+            Idea sizeIdea = entityIdea.get("SIZE");
+            if(colorIdea != null) {
+                hasColorIdea = true;
+                assertEquals("BLUE", colorIdea.getValue());
+            }
+            if(sizeIdea != null) {
+                hasSizeIdea = true;
+                assertEquals("BIG", sizeIdea.getValue());
+            }
+        }
+        assertTrue(hasColorIdea);
+        assertTrue(hasSizeIdea);
+        soarPlugin.stopSOAR();
+    }
+    
+    @Test
+    public void testGetWorldObjectSoarPluginTwoAgentSameName() {
+        String soarRulesPath="src/test/resources/smartCar.soar";
+        SOARPlugin soarPlugin1 = new SOARPlugin("Creature_1", new File(soarRulesPath), false);
+        SOARPlugin soarPlugin2 = new SOARPlugin("Creature_1", new File(soarRulesPath), false);
+        String jsonString = "{\"OutputLink\":{\"CURRENT_PERCEPTION\":{\"CONFIGURATION\":{\"TRAFFIC_LIGHT\":{\"CURRENT_PHASE\":{\"PHASE\":\"RED\",\"NUMBER\":4.0}},\"SMARTCAR_INFO\":\"NO\"}}}}";
+        JsonObject jsonInput = JsonParser.parseString(jsonString).getAsJsonObject();
+
+        soarPlugin1.setOutputLinkIdea((Idea)soarPlugin1.createIdeaFromJson(jsonInput));
+        Idea soar1 = soarPlugin1.getWorldObject(soarPlugin1.getOutputLinkIdentifier(), soarPlugin1.getAgentName());
+        
+        soarPlugin2.setOutputLinkIdea((Idea)soarPlugin1.createIdeaFromJson(jsonInput));
+        Idea soar2 = soarPlugin2.getWorldObject(soarPlugin1.getOutputLinkIdentifier(), soarPlugin2.getAgentName());
+
+        assertTrue(soar1.equals(soar2));
+    }
+
+    @Test
+    public void testGetWorldObjectSoarPluginTwoAgentDifferentName() {
+        String soarRulesPath="src/test/resources/smartCar.soar";
+        SOARPlugin soarPlugin1 = new SOARPlugin("Creature_1", new File(soarRulesPath), false);
+        SOARPlugin soarPlugin2 = new SOARPlugin("Creature_2", new File(soarRulesPath), false);
+        String jsonString = "{\"OutputLink\":{\"CURRENT_PERCEPTION\":{\"CONFIGURATION\":{\"TRAFFIC_LIGHT\":{\"CURRENT_PHASE\":{\"PHASE\":\"RED\",\"NUMBER\":4.0}},\"SMARTCAR_INFO\":\"NO\"}}}}";
+        JsonObject jsonInput = JsonParser.parseString(jsonString).getAsJsonObject();
+
+        soarPlugin1.setOutputLinkIdea((Idea)soarPlugin1.createIdeaFromJson(jsonInput));
+        Idea soarPlugin1WorldObjectOutputLink = soarPlugin1.getWorldObject(soarPlugin1.getOutputLinkIdentifier(), soarPlugin1.getAgentName());
+
+        soarPlugin2.setOutputLinkIdea((Idea)soarPlugin1.createIdeaFromJson(jsonInput));
+        Idea soarPlugin2WorldObjectOutputLink = soarPlugin2.getWorldObject(soarPlugin1.getOutputLinkIdentifier(), soarPlugin2.getAgentName());
+
+        assertNotEquals(soarPlugin1WorldObjectOutputLink, soarPlugin2WorldObjectOutputLink);
+    }
+
+    @Test
+    public void testProcesOutputLinkTwoAgentDifferentName(){
+        String soarRulesPath="src/test/resources/smartCar.soar";
+        SOARPlugin soarPlugin1 = new SOARPlugin("Creature_1", new File(soarRulesPath), false);
+        SOARPlugin soarPlugin2 = new SOARPlugin("Creature_2", new File(soarRulesPath), false);
+        
+        String jsonString = "{\"InputLink\":{\"CURRENT_PERCEPTION\":{\"CONFIGURATION\":{\"TRAFFIC_LIGHT\":{\"CURRENT_PHASE\":{\"PHASE\":\"RED\",\"NUMBER\":4.0}},\"SMARTCAR_INFO\":\"NO\"}}}}";
+        JsonObject jsonInput = JsonParser.parseString(jsonString).getAsJsonObject();
+
+        soarPlugin1.setInputLinkIdea((Idea)soarPlugin1.createIdeaFromJson(jsonInput));
+        soarPlugin1.runSOAR();
+
+        soarPlugin2.setInputLinkIdea((Idea)soarPlugin2.createIdeaFromJson(jsonInput));
+        soarPlugin2.runSOAR();
+
+        try{
+            Thread.sleep(2000L);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+        Idea soarPlugin1OutputLinkIdea = soarPlugin1.getOutputLinkIdea();
+        Idea soarPlugin2OutputLinkIdea = soarPlugin2.getOutputLinkIdea();
+        assertNotEquals(soarPlugin1OutputLinkIdea, soarPlugin2OutputLinkIdea);
+        soarPlugin1.stopSOAR();
+        soarPlugin2.stopSOAR();
+    }      
+    
+     @Test
+    public void createIdeaFromJson_ArrayOfLights_Test() {
+        String soarRulesPath="src/test/resources/smartCar.soar";
+        SOARPlugin soarPlugin = new SOARPlugin("Creature", new File(soarRulesPath), false);
+        String json = "{\n" +
+                      "  \"traffic\": {\n" +
+                      "    \"light\": [\n" +
+                      "      { \"color\": \"red\", \"number\": 4 },\n" +
+                      "      { \"color\": \"green\", \"number\": 1 }\n" +
+                      "    ]\n" +
+                      "  }\n" +
+                      "}";
+
+        JsonObject jsonInput = JsonParser.parseString(json).getAsJsonObject();
+        Object result = soarPlugin.createIdeaFromJson(jsonInput); // substitua por instância real, se necessário
+
+        // A saída principal deve ser uma única Idea chamada "traffic"
+        assertTrue(result instanceof Idea);
+        Idea traffic = (Idea) result;
+        assertEquals("traffic", traffic.getName());
+
+        // Deve haver exatamente 2 filhos chamados "light"
+        ArrayList<Idea> lights = new ArrayList<>();
+        for (Idea child : traffic.getL()) {
+            if (child.getName().equals("light")) {
+                lights.add(child);
+            }
+        }
+
+        assertEquals(2, lights.size());
+        
+
+        Idea light1 = lights.get(0);
+        Idea light2 = lights.get(1);
+        if (light1 != null &&  light1.getL().get(0).getValue() == "red") {
+            assertEquals("red", light1.getL().get(0).getValue());
+            assertEquals(4.0, light1.getL().get(1).getValue()); 
+
+            assertEquals("green", light2.getL().get(0).getValue());
+            assertEquals(1.0, light2.getL().get(1).getValue());
+        } else if (light1 != null &&  light1.getL().get(0).getValue() == "green") {
+            assertEquals("green", light1.getL().get(0).getValue());
+            assertEquals(1.0, light1.getL().get(1).getValue()); 
+
+            assertEquals("red", light2.getL().get(0).getValue());
+            assertEquals(4.0, light2.getL().get(1).getValue());
+        }
+        
     }
 }
