@@ -3,6 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package br.unicamp.cst.bindings.ros2java;
+import troca_ros.AddTwoIntsRequestMessage;
+import troca_ros.AddTwoIntsResponseMessage;
+import troca_ros.AddTwoIntsServiceDefinition;
 
 /**
  *

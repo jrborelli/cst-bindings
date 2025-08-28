@@ -77,7 +77,8 @@ public abstract class RosTopicPublisherCodelet<T extends Message> extends Codele
         if (motorMemory != null && motorMemory.getI() != null) {
             T message = createNewMessage();
             fillMessageToBePublished(motorMemory, message);
-            publisher.submit(message);
+            if (!publisher.isClosed())
+               publisher.submit(message);
         }
     }
 
