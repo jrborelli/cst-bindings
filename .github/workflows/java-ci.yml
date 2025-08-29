@@ -40,7 +40,7 @@ jobs:
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
           rm -f ~/.gradle/caches/modules-2/gc.properties
       - name: Generate code coverage data from test execution
-        run: curl https://qlty.sh | sh > qlty coverage publish --override-commit-sha COMMIT_SHA --override-branch BRANCH_NAME COVERAGE_FILE_PATH
+        run: curl https://qlty.sh | sh && qlty coverage publish --override-commit-sha COMMIT_SHA --override-branch BRANCH_NAME COVERAGE_FILE_PATH
         uses: qltysh/qlty-action/coverage@v2
         with:
           oidc: true
