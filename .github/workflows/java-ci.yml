@@ -43,7 +43,8 @@ jobs:
         uses: qltysh/qlty-action/coverage@v2
         with:
           oidc: true
-          files: lcov.info    
+          files: COVERAGE_FILE_PATH
+          #files: lcov.info    
       #- name: Test & publish code coverage
       #  uses: paambaati/codeclimate-action@v5.0.0
       #  env:
