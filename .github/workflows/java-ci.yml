@@ -25,8 +25,8 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: 'adopt'
           cache: gradle
-      - name: Before Script
-        run: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter && chmod +x ./cc-test-reporter && ./cc-test-reporter before-build
+      #- name: Before Script
+      #  run: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter && chmod +x ./cc-test-reporter && ./cc-test-reporter before-build
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v3.3.0
       - name:  Build with Gradle headless
