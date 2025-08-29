@@ -39,10 +39,10 @@ jobs:
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
           rm -f ~/.gradle/caches/modules-2/gc.properties
-      - name: Test & publish code coverage
-        uses: paambaati/codeclimate-action@v5.0.0
-        env:
-          CC_TEST_REPORTER_ID: e725fad6a6a0b7580271e8183ad773ff705a3b33c5d3a588b940b4f00fa85e69
-          JACOCO_SOURCE_PATH: "${{github.workspace}}/src/main/java"
-        with:
-          coverageLocations: ${{github.workspace}}/build/reports/jacoco/test/jacocoTestReport.xml:jacoco
+      #- name: Test & publish code coverage
+      #  uses: paambaati/codeclimate-action@v5.0.0
+      #  env:
+      #    CC_TEST_REPORTER_ID: e725fad6a6a0b7580271e8183ad773ff705a3b33c5d3a588b940b4f00fa85e69
+      #    JACOCO_SOURCE_PATH: "${{github.workspace}}/src/main/java"
+      #  with:
+      #    coverageLocations: ${{github.workspace}}/build/reports/jacoco/test/jacocoTestReport.xml:jacoco
