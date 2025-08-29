@@ -72,9 +72,22 @@ public abstract class RosServiceClientSync<S extends Message, T extends Message>
      * @throws TimeoutException if service call times out
      */
     public T callService(Object[] args) throws InterruptedException, ExecutionException, TimeoutException {
+        return callService(args,15);
+    }
+    
+    /**
+     * Call the service synchronously.
+     * @param args input parameters for the request message
+     * @param timeout input parameter to indicate the timeout for the call
+     * @return response message from service
+     * @throws InterruptedException if waiting is interrupted
+     * @throws ExecutionException if service call fails
+     * @throws TimeoutException if service call times out
+     */
+    public T callService(Object[] args, long timeout) throws InterruptedException, ExecutionException, TimeoutException {
         formatServiceRequest(args, requestMessage);
         CompletableFuture<T> responseFuture = serviceClient.sendRequestAsync(requestMessage);
-        // Wait for up to 5 seconds for a response, adjust as needed
-        return responseFuture.get(5, TimeUnit.SECONDS);
+        // Wait for up to timeout seconds for a response
+        return responseFuture.get(timeout, TimeUnit.SECONDS);
     }
 }
