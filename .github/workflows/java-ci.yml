@@ -39,6 +39,11 @@ jobs:
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
           rm -f ~/.gradle/caches/modules-2/gc.properties
+      - name: Generate code coverage data from test execution
+        uses: qltysh/qlty-action/coverage@v2
+        with:
+          oidc: true
+          files: lcov.info    
       #- name: Test & publish code coverage
       #  uses: paambaati/codeclimate-action@v5.0.0
       #  env:
