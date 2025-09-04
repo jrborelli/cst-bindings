@@ -51,7 +51,7 @@ jobs:
           oidc: true
           #files: COVERAGE_FILE_PATH
           files: ${{github.workspace}}/build/reports/jacoco/test/jacocoTestReport.xml
-          add-prefix: src/main/java
+          add-prefix: src/main/java/
       #- name: Test & publish code coverage
       #  uses: paambaati/codeclimate-action@v5.0.0
       #  env:
