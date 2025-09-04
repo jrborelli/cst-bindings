@@ -39,14 +39,14 @@ jobs:
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
           rm -f ~/.gradle/caches/modules-2/gc.properties
-      - name: Generate code coverage data from test execution
-        run: curl https://qlty.sh | sh && source /home/runner/.config/.bashrc && qlty coverage publish --override-commit-sha COMMIT_SHA --override-branch BRANCH_NAME COVERAGE_FILE_PATH
+      #- name: Generate code coverage data from test execution
+      #  run: curl https://qlty.sh | sh && source /home/runner/.config/.bashrc && qlty coverage publish --override-commit-sha COMMIT_SHA --override-branch BRANCH_NAME COVERAGE_FILE_PATH
       - name: Send code coverage data from test execution  
         uses: qltysh/qlty-action/coverage@v2
         with:
           oidc: true
-          files: COVERAGE_FILE_PATH
-          #files: lcov.info    
+          #files: COVERAGE_FILE_PATH
+          files: ${{github.workspace}}/build/reports/jacoco/test/jacocoTestReport.xml    
       #- name: Test & publish code coverage
       #  uses: paambaati/codeclimate-action@v5.0.0
       #  env:
