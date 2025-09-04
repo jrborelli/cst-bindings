@@ -52,6 +52,7 @@ jobs:
           #files: COVERAGE_FILE_PATH
           files: ${{github.workspace}}/build/reports/jacoco/test/jacocoTestReport.xml
           project-root: .
+          prefix-paths: src/main/java
       #- name: Test & publish code coverage
       #  uses: paambaati/codeclimate-action@v5.0.0
       #  env:
