@@ -50,7 +50,8 @@ jobs:
         with:
           oidc: true
           #files: COVERAGE_FILE_PATH
-          files: ${{github.workspace}}/build/reports/jacoco/test/jacocoTestReport.xml    
+          files: ${{github.workspace}}/build/reports/jacoco/test/jacocoTestReport.xml
+          project-root: .
       #- name: Test & publish code coverage
       #  uses: paambaati/codeclimate-action@v5.0.0
       #  env:
