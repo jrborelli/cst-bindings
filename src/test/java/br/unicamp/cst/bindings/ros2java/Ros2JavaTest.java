@@ -3,45 +3,30 @@
  */
 package br.unicamp.cst.bindings.ros2java;
 
-import br.unicamp.cst.core.entities.Memory;
 import br.unicamp.cst.core.entities.MemoryObject;
 import br.unicamp.cst.core.entities.Mind;
+import br.unicamp.cst.support.TimeStamp;
 import id.jrosmessages.std_msgs.StringMessage;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeTrue;
 
-import id.jrosclient.JRosClient;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import troca_ros.AddTwoIntsResponseMessage;
 
 public class Ros2JavaTest {
 
     private static Mind mind;
-    //private static boolean isRos2Available = false;
-    
-    /*
+
     @BeforeClass
     public static void setup() {
+        SilenceLoggers();
         mind = new Mind();
-    }  */
-    
-    @BeforeClass
-    public static void setup() {
-        mind = new Mind();
-        
-        // This is the crucial check to skip the tests if ROS 2 is not available.
-        // It creates a client and attempts to connect, which will fail if no daemon is running.     
-        try {
-            JRosClient client = new JRosClient();
-            client.wait(5); // Await for 5 seconds to connect
-            client.close();
-        } catch (Exception e) {
-            // This is the condition for assuming the tests will not run
-            assumeTrue(false);
-        }   
     }
 
     @AfterClass
@@ -50,17 +35,26 @@ public class Ros2JavaTest {
             mind.shutDown();
         }
     }
+    
+    private static void SilenceLoggers() {
+        Logger.getLogger("pinorobotics.rtpstalk").setLevel(Level.OFF);
+        Logger.getLogger("id.jros2client").setLevel(Level.OFF);
+    }
 
     @Test
     public void testRos2Topics() throws InterruptedException {
-                
+        
+        setup();
         RosTopicSubscriberCodelet<StringMessage> subscriber = new RosTopicSubscriberCodelet<>("chatter", StringMessage.class) {
+            public long lasttime = 0;
             @Override
             public void fillMemoryWithReceivedMessage(StringMessage message, br.unicamp.cst.core.entities.Memory sensoryMemory) {
                 sensoryMemory.setI(message.data);
-                System.out.println("I heard: \"" + message.data + "\"");
+                lasttime = sensoryMemory.getTimestamp();
+                System.out.println("I heard: \"" + message.data + "\" at "+TimeStamp.getStringTimeStamp(lasttime));                
             }
         };
+        
 
         RosTopicPublisherCodelet<StringMessage> publisher = new RosTopicPublisherCodelet<>("chatter", StringMessage.class) {
             @Override
@@ -76,37 +70,46 @@ public class Ros2JavaTest {
             }
         };
 
-        MemoryObject sensoryMemory = mind.createMemoryObject("chatter");
-        subscriber.addOutput(sensoryMemory);
-
-        MemoryObject motorMemory = mind.createMemoryObject("chatter");
-        publisher.addInput(motorMemory);
+        MemoryObject internalMemory = mind.createMemoryObject("chatter");
+        subscriber.addOutput(internalMemory);
+        publisher.addInput(internalMemory);
 
         // Send the message
         String expectedMessage = "Hello World";
-        motorMemory.setI(expectedMessage);
+        internalMemory.setI(expectedMessage);
 
         mind.insertCodelet(subscriber);
         mind.insertCodelet(publisher);
+        long orig = internalMemory.getTimestamp();
+        System.out.println("Starting: "+TimeStamp.getStringTimeStamp(orig));
         mind.start();
-
-        Thread.sleep(4000); // allow some time for message exchange
-         
-        String actualMessage = (String) sensoryMemory.getI();
+        long novo = internalMemory.getTimestamp();
+        // Wait until a new info is actualized by the subscriber codelet (the Timestamp is changed)
+        while(novo == orig) novo = internalMemory.getTimestamp();
+        System.out.println("First message received by: "+TimeStamp.getStringTimeStamp(novo)+" ... it took "+TimeStamp.getStringTimeStamp(novo-orig,"ss.SSS")+" seconds");
+        String actualMessage = (String) internalMemory.getI();
         assertEquals(expectedMessage, actualMessage);
 
-        //Thread.sleep(500);
-        
-        mind.shutDown();
+        mind.shutDown();        
+        publisher.stop();
+        subscriber.stop();
+        cleanup();
+        System.out.println("Finished first test...");
     }  
+    
 
     @Test
     public void testRos2ServiceSync() throws InterruptedException, ExecutionException, TimeoutException {
-        // The service test is also dependent on a running ROS 2 environment.
-        // The check in @BeforeClass will handle this.
+        System.out.println("Starting 2nd test...");
+        TimeStamp.setStartTime();
+        // Start the server
+        AddTwoIntsServiceProvider serviceProvider = new AddTwoIntsServiceProvider();
+        serviceProvider.start();
+        
+        // Start the client
         AddTwoIntsServiceClientSyncRos2 clientSync = new AddTwoIntsServiceClientSyncRos2("add_two_ints");
         clientSync.start();
-
+        
         // First test
         long expectedSum1 = 5L;
         Object[] args1 = new Object[]{2L, 3L};
@@ -122,8 +125,9 @@ public class Ros2JavaTest {
         assertEquals(expectedSum2, actualSum2);
 
         clientSync.stop();
+        serviceProvider.stop();
+        System.out.println("It took "+TimeStamp.getDelaySinceStart());
     }
 }
-
 
 
