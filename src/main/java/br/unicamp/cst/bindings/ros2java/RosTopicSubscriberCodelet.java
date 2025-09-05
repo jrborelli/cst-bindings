@@ -56,7 +56,7 @@ public abstract class RosTopicSubscriberCodelet<T extends Message> extends Codel
     @Override
     public synchronized void stop() {
         try {
-            //if (subscriber != null) subscriber.close();
+            //if (subscriber != null) subscriber..close();
             if (ros2Client != null) ros2Client.close();
         } catch (Exception e) {
             e.printStackTrace();

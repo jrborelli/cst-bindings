@@ -30,14 +30,14 @@ repositories {
     }
     mavenCentral()
     maven {
-        url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+        url = "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
     }
     maven {
-        url "https://artifacts.camunda.com/artifactory/public/"
+        url = "https://artifacts.camunda.com/artifactory/public/"
     }
-    maven { url 'https://jitpack.io' }
+    maven { url = 'https://jitpack.io' }
     maven {
-        url 'https://cst-group.github.io/cst-dependencies/maven-repo/'
+        url = 'https://cst-group.github.io/cst-dependencies/maven-repo/'
     }
 }
 
@@ -57,12 +57,15 @@ dependencies {
     api 'ch.qos.logback:logback-classic:1.0.11' // Used in JSoarCodelet
 
     testImplementation 'com.1stleg:jnativehook:2.1.0'
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    // These are necessary for JUnit4 tests
+    testImplementation 'junit:junit:4.12'
+    // These are necessary for JUnit5 tests
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.ros.rosjava_messages:std_msgs:0.5.11'
     testImplementation 'org.ros.rosjava_messages:rosjava_test_msgs:0.3.0'
-    implementation 'com.github.CST-Group:cst-bindings:1.1.0'
+    //implementation 'com.github.CST-Group:cst-bindings:1.1.0'
 
    // JROS:
    //implementation 'io.github.lambdaprime:jroscommon:1.0'
@@ -122,4 +125,8 @@ jacocoTestReport {
 
 uberJar {
     dependsOn jar
+}
+
+test {
+    useJUnitPlatform()
 }
