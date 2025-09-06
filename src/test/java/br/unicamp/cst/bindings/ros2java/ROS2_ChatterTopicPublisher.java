@@ -1,5 +1,6 @@
 /**
- * 
+ * @author jrborelli
+ *
  */
 package br.unicamp.cst.bindings.ros2java;
 
@@ -8,10 +9,6 @@ import id.jrosmessages.std_msgs.StringMessage;
 
 import java.net.URI;
 
-/**
- * @author jrborelli
- *
- */
 
 
 public class ROS2_ChatterTopicPublisher extends RosTopicPublisherCodelet<StringMessage> {
@@ -36,25 +33,3 @@ public class ROS2_ChatterTopicPublisher extends RosTopicPublisherCodelet<StringM
     }
 }
 
-/*
-// Setup CST Mind and Memory:
-Mind mind = new Mind();
-
-ChatterTopicPublisher publisher = new ChatterTopicPublisher("chatter");
-Memory motorMemory = mind.createMemoryObject("chatter");
-publisher.addInput(motorMemory);
-
-mind.insertCodelet(publisher);
-
-// Set message to publish
-motorMemory.setI("Hello ROS2 from CST!");
-
-// Start mind, let publisher run for a few cycles
-mind.start();
-
-// Sleep a bit to allow publishing
-Thread.sleep(2000);
-
-// Then shutdown mind
-mind.shutDown();
-*/

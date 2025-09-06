@@ -7,6 +7,7 @@
  * <p>
  * Contributors:
  * K. Raizer, A. L. O. Paraense, E. M. Froes, R. R. Gudwin - initial API and implementation
+ * jrborelli - ROS2
  ***********************************************************************************************/
 
 package br.unicamp.cst.bindings.ros2java;

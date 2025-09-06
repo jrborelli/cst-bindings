@@ -7,6 +7,7 @@
  * <p>
  * Contributors:
  * K. Raizer, A. L. O. Paraense, E. M. Froes, R. R. Gudwin - initial API and implementation
+ * jrborelli - ROS2
  ***********************************************************************************************/
 package br.unicamp.cst.bindings.ros2java;
 
@@ -88,19 +89,3 @@ public abstract class RosTopicPublisherCodelet<T extends Message> extends Codele
     /** Fill the message using memory content */
     protected abstract void fillMessageToBePublished(Memory motorMemory, T message);
 }
-
-/* // Exemplo de uso:
-
-RosTopicPublisherCodelet<StringMessage> pub = new RosTopicPublisherCodelet<>("/chatter", StringMessage.class) {
-    @Override
-    protected StringMessage createNewMessage() {
-        return new StringMessage();
-    }
-
-    @Override
-    protected void fillMessageToBePublished(Memory motorMemory, StringMessage message) {
-        message.data = "Hello " + motorMemory.getI();
-    }
-};
-
-*/
