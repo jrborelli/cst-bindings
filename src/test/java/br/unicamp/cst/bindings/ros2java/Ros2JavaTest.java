@@ -1,4 +1,3 @@
-
 package br.unicamp.cst.bindings.ros2java;
 
 import br.unicamp.cst.core.entities.MemoryObject;
@@ -6,9 +5,8 @@ import br.unicamp.cst.core.entities.Memory;
 import br.unicamp.cst.core.entities.Mind;
 import br.unicamp.cst.support.TimeStamp;
 import id.jrosmessages.std_msgs.StringMessage;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-//import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.Assert.assertEquals;
 
@@ -21,19 +19,18 @@ import troca_ros.*;
 /**
  * @author jrborelli
  */
-        
 public class Ros2JavaTest {
 
-    private static final Logger logger = Logger.getLogger(Ros2JavaTest.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Ros2JavaTest.class.getName());
     private static Mind mind;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         SilenceLoggers();
         mind = new Mind();
     }
 
-    @AfterClass
+    @AfterAll
     public static void cleanup() {
         if (mind != null) {
             mind.shutDown();
@@ -48,14 +45,13 @@ public class Ros2JavaTest {
     @Test
     public void testRos2Topics() throws InterruptedException {
         
-        setup();
         RosTopicSubscriberCodelet<StringMessage> subscriber = new RosTopicSubscriberCodelet<>("chatter", StringMessage.class) {
             public long lasttime = 0;
             @Override
             public void fillMemoryWithReceivedMessage(StringMessage message, Memory sensoryMemory) {
                 sensoryMemory.setI(message.data);
                 lasttime = sensoryMemory.getTimestamp();
-                logger.log(Level.INFO,"I heard: {0} at {1}", new Object[]{message.data , TimeStamp.getStringTimeStamp(lasttime)});                
+                LOGGER.log(Level.INFO,"I heard: {0} at {1}", new Object[]{message.data , TimeStamp.getStringTimeStamp(lasttime)}); 
             }
         };
         
@@ -85,21 +81,24 @@ public class Ros2JavaTest {
         mind.insertCodelet(subscriber);
         mind.insertCodelet(publisher);
         long orig = internalMemory.getTimestamp();
-        logger.log(Level.INFO,"Starting: {0}",TimeStamp.getStringTimeStamp(orig));
+        LOGGER.log(Level.INFO,"Starting: {0}", new Object[]{TimeStamp.getStringTimeStamp(orig)});
         mind.start();
         long novo = internalMemory.getTimestamp();
         // Wait until a new info is actualized by the subscriber codelet (the Timestamp is changed)
-        while(novo == orig) novo = internalMemory.getTimestamp();
-        logger.log(Level.INFO, "First message received by: {0} ... it took {1} seconds", new Object[]{TimeStamp.getStringTimeStamp(novo), TimeStamp.getStringTimeStamp(novo - orig, "ss.SSS")});
+        while(novo == orig) {
+            Thread.sleep(100);
+            novo = internalMemory.getTimestamp();
+        }
+        LOGGER.log(Level.INFO, "First message received by: {0} ... it took {1} seconds", new Object[]{TimeStamp.getStringTimeStamp(novo), TimeStamp.getStringTimeStamp(novo - orig, "ss.SSS")});
         String actualMessage = (String) internalMemory.getI();
         assertEquals(expectedMessage, actualMessage);
 
         mind.shutDown();        
         publisher.stop();
         subscriber.stop();
-        cleanup();
-        logger.log(Level.INFO,"Finished first test...");
-    }  
+        
+        LOGGER.log(Level.INFO,"Finished first test...");
+    }    
     
     @Test
     public void testChatterTopicSpecializedCodelets() throws InterruptedException {
@@ -120,7 +119,7 @@ public class Ros2JavaTest {
         mind.insertCodelet(subscriber);
         mind.insertCodelet(publisher);
         long orig = internalMemory.getTimestamp();
-        logger.log(Level.INFO,"Starting: {0}" , TimeStamp.getStringTimeStamp(orig));
+        LOGGER.log(Level.INFO,"Starting: {0}" , new Object[]{TimeStamp.getStringTimeStamp(orig)});
         mind.start();
         
         long novo = internalMemory.getTimestamp();
@@ -130,7 +129,7 @@ public class Ros2JavaTest {
             novo = internalMemory.getTimestamp();
         }
         
-        logger.log(Level.INFO, "First message received by: {0} ... it took {1} seconds", new Object[]{TimeStamp.getStringTimeStamp(novo), TimeStamp.getStringTimeStamp(novo - orig, "ss.SSS")});
+        LOGGER.log(Level.INFO, "First message received by: {0} ... it took {1} seconds", new Object[]{TimeStamp.getStringTimeStamp(novo), TimeStamp.getStringTimeStamp(novo - orig, "ss.SSS")});
         String actualMessage = (String) internalMemory.getI();
 
         // Assert that the received message is the same as the sent one
@@ -140,8 +139,8 @@ public class Ros2JavaTest {
         mind.shutDown();
         publisher.stop();
         subscriber.stop();
-        cleanup();
-        logger.log(Level.INFO,"Finished testChatterTopicIntegration...");
+        
+        LOGGER.log(Level.INFO,"Finished testChatterTopicIntegration...");
     }
 
     
@@ -188,7 +187,7 @@ public class Ros2JavaTest {
         oneShotPublisher.setEnabled(true);
         
         long orig = internalMemory.getTimestamp();
-        logger.log(Level.INFO,"Starting one-shot test: " , TimeStamp.getStringTimeStamp(orig));
+        LOGGER.log(Level.INFO,"Starting one-shot test: {0}" , new Object[]{TimeStamp.getStringTimeStamp(orig)});
 
         // Wait until a new info is actualized by the subscriber codelet
         long novo = internalMemory.getTimestamp();
@@ -197,7 +196,7 @@ public class Ros2JavaTest {
             novo = internalMemory.getTimestamp();
         }
         
-        logger.log(Level.INFO, "One-shot message received at: {0} ... it took {1} seconds", new Object[]{TimeStamp.getStringTimeStamp(novo), TimeStamp.getStringTimeStamp(novo - orig, "ss.SSS")});
+        LOGGER.log(Level.INFO, "One-shot message received at: {0} ... it took {1} seconds", new Object[]{TimeStamp.getStringTimeStamp(novo), TimeStamp.getStringTimeStamp(novo - orig, "ss.SSS")});
         String actualMessage = (String) internalMemory.getI();
 
         // Assert that the received message is the same as the sent one
@@ -207,13 +206,13 @@ public class Ros2JavaTest {
         mind.shutDown();
         oneShotPublisher.stop();
         subscriber.stop();
-        cleanup();
-        logger.log(Level.INFO,"Finished testOneShotPublisher...");
+        
+        LOGGER.log(Level.INFO,"Finished testOneShotPublisher...");
     }
     
     @Test
     public void testRosServiceClientCodeletAsync() throws InterruptedException {
-        logger.log(Level.INFO,"Starting ROS service client test...");
+        LOGGER.log(Level.INFO,"Starting ROS service client test...");
 
         // Create a mock service provider for the test
         AddTwoIntsServiceProvider serviceProvider = new AddTwoIntsServiceProvider();
@@ -239,7 +238,7 @@ public class Ros2JavaTest {
             @Override
             protected void processServiceResponse(AddTwoIntsResponseMessage response) {
                 if (response != null) {
-                    logger.log(Level.INFO,"Sum received from service: {0}" , response.sum);
+                    LOGGER.log(Level.INFO,"Sum received from service: {0}" , new Object[]{response.sum});
                     // Update the input memory with the response for verification
                     this.inputMemory.setI(response.sum);
                 }
@@ -258,7 +257,7 @@ public class Ros2JavaTest {
         mind.start();
         
         long orig = internalMemory.getTimestamp();
-        logger.log(Level.INFO,"Starting service request at: {0}" , TimeStamp.getStringTimeStamp(orig));
+        LOGGER.log(Level.INFO,"Starting service request at: {0}" , new Object[]{TimeStamp.getStringTimeStamp(orig)});
 
         long novo = internalMemory.getTimestamp();
         // Wait until the memory object is updated with the service response
@@ -267,7 +266,7 @@ public class Ros2JavaTest {
             novo = internalMemory.getTimestamp();
         }
 
-        logger.log(Level.INFO, "Service response received at: {0}", TimeStamp.getStringTimeStamp(novo));
+        LOGGER.log(Level.INFO, "Service response received at: {0}", new Object[]{TimeStamp.getStringTimeStamp(novo)});
         Long actualSum = (Long) internalMemory.getI();
 
         // Assert that the sum is correct
@@ -277,14 +276,14 @@ public class Ros2JavaTest {
         mind.shutDown();
         clientCodelet.stop();
         serviceProvider.stop();
-        cleanup();
-        logger.log(Level.INFO, "Finished testRosServiceClientCodelet...");
+        
+        LOGGER.log(Level.INFO, "Finished testRosServiceClientCodelet...");
     }
 
     @Test
     public void testRos2ServiceSync() throws InterruptedException, ExecutionException, TimeoutException {
-        logger.log(Level.INFO, "Starting 2nd test...");
-        TimeStamp.setStartTime();
+        LOGGER.log(Level.INFO, "Starting 2nd test...");
+        
         // Start the server
         AddTwoIntsServiceProvider serviceProvider = new AddTwoIntsServiceProvider();
         serviceProvider.start();
@@ -309,9 +308,8 @@ public class Ros2JavaTest {
 
         clientSync.stop();
         serviceProvider.stop();
-        //logger.info("It took "+TimeStamp.getDelaySinceStart());
-        logger.log(Level.INFO, "It took {0}", TimeStamp.getDelaySinceStart());
+        
+        LOGGER.log(Level.INFO, "It took {0}", new Object[]{TimeStamp.getDelaySinceStart()});
     }
 }
-
 
