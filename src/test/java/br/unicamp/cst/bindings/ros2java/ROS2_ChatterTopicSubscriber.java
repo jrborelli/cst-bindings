@@ -1,6 +1,3 @@
-/**
- * 
- */
 package br.unicamp.cst.bindings.ros2java;
 
 

@@ -1,7 +1,4 @@
-/**
- * @author jrborelli
- *
- */
+
 package br.unicamp.cst.bindings.ros2java;
 
 import br.unicamp.cst.core.entities.Memory;
@@ -9,7 +6,10 @@ import id.jrosmessages.std_msgs.StringMessage;
 
 import java.net.URI;
 
-
+/**
+ * @author jrborelli
+ *
+ */
 
 public class ROS2_ChatterTopicPublisher extends RosTopicPublisherCodelet<StringMessage> {
 

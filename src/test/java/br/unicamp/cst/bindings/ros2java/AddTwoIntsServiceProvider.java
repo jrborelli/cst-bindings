@@ -9,6 +9,10 @@ import troca_ros.AddTwoIntsRequestMessage;
 import troca_ros.AddTwoIntsResponseMessage;
 import troca_ros.AddTwoIntsServiceDefinition;
 
+/**
+ *
+ * @author jrborelli
+ */
 
 public class AddTwoIntsServiceProvider implements Runnable {
     
